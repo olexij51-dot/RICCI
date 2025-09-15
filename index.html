@@ -9,6 +9,7 @@
       margin: 0;
       background-color: white;
       font-family: 'Segoe UI', sans-serif;
+      position: relative;
     }
 
     header {
@@ -19,12 +20,13 @@
       letter-spacing: 2px;
     }
 
+    /* Force 3 stalks (image+price+buy button) per row */
     .product-grid {
-      display: flex;
-      justify-content: center;
-      gap: 20px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 30px;
       padding: 2rem;
-      flex-wrap: wrap;
+      justify-items: center;
     }
 
     .product {
@@ -32,10 +34,41 @@
       text-align: center;
     }
 
-    .product img {
+    .product-image {
+      position: relative;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .product-image img {
       width: 100%;
       height: auto;
-      border-radius: 8px;
+      display: block;
+      border-radius: 10px;
+      background-color: #f0f0f0;
+    }
+
+    .overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border-radius: 10px;
+      background-color: rgba(0, 0, 0, 0.6);
+      color: white;
+      font-weight: bold;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .product-image:hover .overlay {
+      opacity: 1;
     }
 
     .price {
@@ -45,76 +78,90 @@
     }
 
     .buy-button {
+      display: inline-block;
       margin-top: 0.5rem;
       padding: 0.5rem 1rem;
-      background-color: #90ee90; /* light green */
-      border: none;
+      background-color: #90ee90;
       border-radius: 4px;
-      cursor: pointer;
       font-weight: bold;
+      text-decoration: none;
+      color: black;
+      transition: all 0.3s ease;
     }
-
-   
 
     .buy-button:hover {
       background-color: #76d976;
+      transform: scale(1.05);
+    }
+
+    .footer {
+      position: fixed;
+      bottom: 10px;
+      right: 15px;
+      font-size: 0.9rem;
+      color: #666;
     }
   </style>
 </head>
 <body>
   <header>RICCI</header>
-  
-    <style>
-        a {
-        text-decoration: none;
-        color:black
-        }
-    </style>
-    
-  
+
   <div class="product-grid">
     <div class="product">
-      <img src="ricci shirt.webp" alt="Product 1" />
+      <div class="product-image">
+        <img src="ricci shirt.webp" alt="RICCI Shirt" />
+        <div class="overlay">BALATON EXCLUSIVE.</div>
+      </div>
       <div class="price">£67</div>
-      <button class="buy-button"><a href="Buying.html">Buy</a></button>
+      <a href="Buying.html" class="buy-button">Buy</a>
     </div>
+
     <div class="product">
-      <img src="images/angry face RICCI.jpg" alt="Product 2" />
+      <div class="product-image">
+        <img src="angry face RICCI.jpg" alt="Angry Face Shirt" />
+        <div class="overlay">BALATON EXCLUSIVE.</div>
+      </div>
       <div class="price">£67</div>
-      <button class="buy-button"><a href="Buying.html">Buy</a></button>
+      <a href="Buying.html" class="buy-button">Buy</a>
     </div>
+
     <div class="product">
-      <img src="images/logo type RICCI shirt.jpg" alt="Product 3" />
+      <div class="product-image">
+        <img src="logo type RICCI shirt.jpg" alt="Logo Shirt" />
+        <div class="overlay">BALATON EXCLUSIVE.</div>
+      </div>
       <div class="price">£67</div>
-      <button class="buy-button"><a href="Buying.html">Buy</a></button>
+      <a href="Buying.html" class="buy-button">Buy</a>
+    </div>
+
+    <div class="product">
+      <div class="product-image">
+        <img src="ricci shoe.png" alt="RICCI Shoe" />
+        <div class="overlay">BALATON EXCLUSIVE.</div>
+      </div>
+      <div class="price">£67</div>
+      <a href="Buying.html" class="buy-button">Buy</a>
+    </div>
+
+    <div class="product">
+      <div class="product-image">
+        <img src="RICCI belt.png" alt="RICCI Belt" />
+        <div class="overlay">BALATON EXCLUSIVE.</div>
+      </div>
+      <div class="price">£67</div>
+      <a href="Buying.html" class="buy-button">Buy</a>
+    </div>
+
+    <div class="product">
+      <div class="product-image">
+        <img src="make the RICCI cap f.png" alt="RICCI Cap" />
+        <div class="overlay">BALATON EXCLUSIVE.</div>
+      </div>
+      <div class="price">£67</div>
+      <a href="Buying.html" class="buy-button">Buy</a>
     </div>
   </div>
+
+  <div class="footer">– created by Tyler Knapp and Oleg Landushin</div>
 </body>
 </html>
-      <div class="product-grid">
-    <div class="product">
-      <img src="" alt="Product 1" />
-      <div class="price">£67</div>
-      <button class="buy-button"><a href="Buying.html">Buy</a></button>
-    </div>
-    <div class="product">
-      <img src="ricci shoe.png" alt="Product 2" />
-      <div class="price">£67</div>
-      <button class="buy-button"><a href="Buying.html">Buy</a></button>
-    </div>
-    <div class="product">
-      <img src="" alt="Product 3" />
-      <div class="price">£67</div>
-      <button class="buy-button"><a href="Buying.html">Buy</a></button>
-    </div>
-    <div class="product">
-      <img src="" alt="Product 4" />
-      <div class="price">£89</div>
-      <button class="buy-button"><a href="Buying.html">Buy</a></button>
-    </div>
-    <div class="product">
-      <img src="" alt="Product 5" />
-      <div class="price">£59</div>
-      <button class="buy-button"><a href="Buying.html">Buy</a></button>
-    </div>
-  </div>
