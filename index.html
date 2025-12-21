@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RICCI</title>
+  <style>
+    body {
+      margin: 0;
+      background-color: #D4A017;
+      font-family: 'Segoe UI', sans-serif;
+      position: relative;
+    }
+
+    header {
+      text-align: center;
+      padding: 2rem 0;
+      font-size: 2.5rem;
+      font-weight: bold;
+      letter-spacing: 2px;
+    }
+
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 30px;
+      padding: 2rem;
+      justify-items: center;
+    }
+
+    .product {
+      width: 250px;
+      text-align: center;
+    }
+
+    .product-image {
+      position: relative;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .product-image img {
+      width: 100%;
+      height: auto;
+      display: block;
+      border-radius: 10px;
+      background-color: #f0f0f0;
+    }
+
+    .overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border-radius: 10px;
+      background-color: rgba(0, 0, 0, 0.6);
+      color: white;
+      font-weight: bold;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .product-image:hover .overlay {
+      opacity: 1;
+    }
+
+    .price {
+      margin-top: 0.5rem;
+      font-size: 1.2rem;
+      color: #333;
+    }
+
+    .buy-button {
+      display: inline-block;
+      margin-top: 0.5rem;
+      padding: 0.5rem 1rem;
+      background-color: #90ee90;
+      border-radius: 4px;
+      font-weight: bold;
+      text-decoration: none;
+      color: black;
+      transition: all 0.3s ease;
+    }
+
+    .buy-button:hover {
+      background-color: #76d976;
+      transform: scale(1.05);
+    }
+
+    .footer {
+      position: fixed;
+      bottom: 10px;
+      right: 15px;
+      font-size: 0.9rem;
+      color: #666;
+    }
+
+    .play-button {
+      position: fixed;
+      top: 5px;
+      left: 5px;
+      width: 24px;
+      height: 24px;
+      background-color: red;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 0 6px rgba(0,0,0,0.2);
+      z-index: 1002;
+      transition: transform 0.2s ease;
+    }
+
+    .play-button span {
+      color: white;
+      font-size: 0.9rem;
+      font-weight: bold;
+      line-height: 1;
+      margin-left: 1px;
+    }
+
+    .play-button:hover {
+      transform: scale(1.1);
+    }
+
+    .menu-wrapper {
+      position: fixed;
+      top: 20px;
+      right: 30px;
+      z-index: 1001;
+    }
+
+    .menu-icon {
+      cursor: pointer;
+    }
+
+    .menu-icon span {
+      display: block;
+      width: 35px;
+      height: 4px;
+      background: black;
+      margin: 6px 0;
+    }
+
+    .menu {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 140px;
+      background: radial-gradient(ellipse at center,  #b38513 60%,  #D4A017 100%);
+      padding: 40px 30px;
+      font-size: 1.3rem;
+      box-shadow: 0 0 50px rgba(0,0,0,0.15);
+      border-radius: 40px;
+      backdrop-filter: blur(10px);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.50s ease;
+    }
+
+    .menu-item {
+      margin: 15px 0;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+
+    .menu-item:hover {
+      transform: scale(1.1);
+    }
+
+    .menu-wrapper:hover .menu,
+    .menu:hover {
+      opacity: 1;
+      pointer-events: auto;
+    }
+  </style>
+</head>
+<body>
+
+  <audio id="bg-music" loop>
+    <source src="RICCI music.mp3" type="audio/mpeg">
+  </audio>
+
+  <div class="play-button" onclick="toggleMusic()">
+    <span id="play-icon">▶</span>
+  </div>
+
+  <script>
+    let isPlaying = false;
+
+    function toggleMusic() {
+      const audio = document.getElementById('bg-music');
+      const icon = document.getElementById('play-icon');
+
+      if (isPlaying) {
+        audio.pause();
+        icon.textContent = '▶';
+      } else {
+        audio.play();
+        icon.textContent = '⏸';
+      }
+
+      isPlaying = !isPlaying;
+    }
+  </script>
+
+  <div class="menu-wrapper">
+    <div class="menu-icon">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+
+    <div class="menu">
+      <div class="menu-item">Cloths</div>
+      <div class="menu-item">Shoes</div>
+      <div class="menu-item">Accessories</div>
+      <div class="menu-item">Black people</div>
+      <div class="menu-item">Curry</div>
+      <div class="menu-item" onclick="location.href='swappable-heads.html'">Swappable Heads</div>
+    </div>
+  </div>
+
+  <header>RICCI</header>
+
+  <div class="product-grid">
+    <div class="product">
+      <div class="product-image">
+        <img src="ricci shirt.jpg" alt="RICCI Shirt" />
+        <div class="overlay">BALATON EXCLUSIVE.</div>
+      </div>
+      <div class="price">£67</div>
+      <a href="Buying.html" class="buy-button">Buy</a>
+    </div>
+
+    <div class="product">
+      <div class="product-image">
+        <img src="angry face RICCI.jpg" alt="Angry Face Shirt" />
+        <div class="overlay">BALATON EXCLUSIVE.</div>
+      </div>
+      <div class="price">£67</div>
+      <a href="Buying.html" class="buy-button">Buy</a>
+    </div>
+
+    <div class="product">
+      <div class="product-image">
+        <img src="logo type RICCI shirt.jpg" alt="Logo Shirt" />
+        <div class="overlay">BALATON EXCLUSIVE.</div>
+      </div>
+      <div class="price">£67</div>
+      <a href="Buying.html" class="buy-button">Buy</a>
+    </div>
+
+    <div class="product">
+      <div class="product-image">
+        <img src="ricci shoes.png" alt="RICCI Shoe" />
+        <div class="overlay">BALATON EXCLUSIVE.</div>
+      </div>
+      <div class="price">£67</div>
+      <a href="Buying.html" class="buy-button">Buy</a>
+    </div>
+
+    <div class="product">
+      <div class="product-image">
+        <img src="ricci silver belt.png" alt="RICCI Belt" />
+        <div class="overlay">BALATON EXCLUSIVE.</div>
+      </div>
+      <div class="price">£67</div>
+      <a href="Buying.html" class="buy-button">Buy</a>
+    </div>
+
+    <div class="product">
+      <div class="product-image">
+        <img src="ricci green cap.png" alt="RICCI Cap" />
+        <div class="overlay">BALATON EXCLUSIVE.</div>
+      </div>
+      <div class="price">£67</div>
+      <a href="Buying.html" class="buy-button">Buy</a>
+    </div>
+
+    <div class="product">
+      <div class="product-image">
+        <img src="mad matt shirt.jpg" alt="mad matt" />
+        <div class="overlay">BALATON EXCLUSIVE.</div>
+      </div>
+      <div class="price">£67</div>
+      <a href="Buying.html" class="buy-button">Buy</a>
+    </div>
+
+   <div class="product">
+      <div class="product-image">
+        <img src="high asf.jpg" alt="high asf" />
+        <div class="overlay">BALATON EXCLUSIVE.</div>
+      </div>
+      <div class="price">£67</div>
+      <a href="Buying.html" class="buy-button">Buy</a>
+    </div>
+
+    <div class="product">
+      <div class="product-image">
+        <img src="detailed ricci.jpg" alt="detailed ricci" />
+        <div class="overlay">BALATON EXCLUSIVE.</div>
+      </div>
+      <div class="price">£67</div>
+      <a href="Buying.html" class="buy-button">Buy</a>
+    </div>
+
+   <div class="product">
+      <div class="product-image">
+        <img src="oleg polo.jpg" alt="oleg polo" />
+        <div class="overlay">BALATON EXCLUSIVE.</div>
+      </div>
+      <div class="price">£67</div>
+      <a href="Buying.html" class="buy-button">Buy</a>
+    </div>
+  </div>
+  <div class="footer">– created by Tyler Knapp and Oleg Landushin>
