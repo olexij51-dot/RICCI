@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>RICCI Swappable Heads</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #000000;
+      padding: 20px;
+      text-align: center;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    h1 {
+      color: rgb(255, 255, 255);
+      font-size: 2.5rem;
+      margin-bottom: 40px;
+    }
+
+    .faces {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      justify-content: center;
+      margin-bottom: 40px;
+    }
+
+    .faces img {
+      width: 100px;
+      height: 100px;
+      object-fit: cover;
+      cursor: grab;
+    }
+
+    .bodies {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 30px;
+      justify-content: center;
+      margin-bottom: 40px;
+    }
+
+    .body {
+      position: relative;
+      width: 300px;
+    }
+
+    .body img {
+      width: 100%;
+      height: auto;
+    }
+
+    .draggable-face {
+      position: absolute;
+      width: 140px;
+      height: 140px;
+      object-fit: cover;
+      cursor: grab;
+      z-index: 1000;
+    }
+
+    .drag-preview {
+      opacity: 0.3;
+    }
+
+    button {
+      padding: 12px 24px;
+      font-size: 1.1rem;
+      cursor: pointer;
+      background-color: #0078D4;
+      color: white;
+      border: none;
+      border-radius: 5px;
+    }
+
+    button:hover {
+      background-color: #005A9E;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>RICCI SWAPPABLE HEADS</h1>
+
+  <div class="faces">
+    <img src="sh1.png" alt="Face 1" />
+    <img src="sh2.png" alt="Face 2" />
+    <img src="sh3.png" alt="Face 3" />
+    <img src="sh4.png" alt="Face 4" />
+    <img src="sh5.png" alt="Face 5" />
+    <img src="sh6.png" alt="Face 6" />
+    <img src="sh7.png" alt="Face 7" />
+    <img src="sh8.png" alt="Face 8" />
+    <img src="sh9.png" alt="Face 9" />
+    <img src="sh10.png" alt="Face 10" />
+    <img src="sh11.png" alt="Face 11" />
+    <img src="sh12.png" alt="Face 12" />
+    <img src="sh13.png" alt="Face 13" />
+    <img src="sh14.png" alt="Face 14" />
+    <img src="sh15.png" alt="Face 15" />
+    <img src="sh16.png" alt="Face 16" />
+    <img src="sh17.png" alt="Face 17" />
+    <img src="sh18.png" alt="Face 18" />
+    <img src="sh19.png" alt="Face 19" />
+    <img src="sh20.png" alt="Face 20" />
+    <img src="sh21.png" alt="Face 21" />
+    <!-- Add more manually up to sh21.jpg -->
+  </div>
+
+  <div class="bodies">
+    <div class="body"><img src="sb1.jpg" alt="Body 1" /></div>
+    <div class="body"><img src="sb2.jpg" alt="Body 2" /></div>
+    <div class="body"><img src="sb3.jpg" alt="Body 3" /></div>
+    <div class="body"><img src="sb4.jpg" alt="Body 4" /></div>
+    <div class="body"><img src="sb5.jpg" alt="Body 5" /></div>
+    <div class="body"><img src="sb6.jpg" alt="Body 6" /></div>
+  </div>
+
+  <button onclick="resetFaces()">Reset All Faces</button>
+
+  <script>
+    let currentDrag = null;
+    let offsetX = 0;
+    let offsetY = 0;
+
+    document.querySelectorAll('.faces img').forEach(face => {
+      face.addEventListener('mousedown', e => {
+        const clone = face.cloneNode(true);
+        clone.classList.add('draggable-face', 'drag-preview');
+        clone.style.left = `${e.pageX - 50}px`;
+        clone.style.top = `${e.pageY - 50}px`;
+        document.body.appendChild(clone);
+        currentDrag = clone;
+        offsetX = e.offsetX;
+        offsetY = e.offsetY;
+      });
+    });
+
+    document.addEventListener('mousemove', e => {
+      if (currentDrag) {
+        currentDrag.style.left = `${e.pageX - offsetX}px`;
+        currentDrag.style.top = `${e.pageY - offsetY}px`;
+      }
+    });
+
+    document.addEventListener('mouseup', () => {
+      if (currentDrag) {
+        currentDrag.classList.remove('drag-preview');
+        currentDrag.draggable = true;
+
+        currentDrag.addEventListener('dragstart', e => {
+          offsetX = e.offsetX;
+          offsetY = e.offsetY;
+        });
+
+        currentDrag.addEventListener('dragend', e => {
+          currentDrag.style.left = `${e.pageX - offsetX}px`;
+          currentDrag.style.top = `${e.pageY - offsetY}px`;
+        });
+
+        currentDrag = null;
+      }
+    });
+
+    function resetFaces() {
+      document.querySelectorAll('.draggable-face').forEach(img => img.remove());
+      location.reload();
+    }
+  </script>
+
+</body>
+</html>
