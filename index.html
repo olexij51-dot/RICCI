@@ -180,12 +180,57 @@
       opacity: 1;
       pointer-events: auto;
     }
+
+    .creator-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 40px;
+  padding: 2rem;
+  justify-items: center;
+}
+
+.creator-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 40px;
+  padding: 2rem;
+  justify-items: center;
+}
+
+.creator {
+  width: 260px;
+  text-align: center;
+}
+
+.creator-img {
+  width: 100%;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.creator-name {
+  margin-top: 10px;
+  font-size: 1.3rem;
+}
+
+.creator-aka {
+  font-size: 1rem;
+  color: #333;
+  margin-top: 4px;
+}
+
+.creator-desc {
+  font-size: 0.9rem;
+  margin-top: 6px;
+  color: #222;
+}
+
   </style>
 </head>
 <body>
 
   <audio id="bg-music" loop>
-    <source src="RICCI music.mp3" type="audio/mpeg">
+    <source src="devesh is paki.mp3" type="audio/mpeg">
   </audio>
 
   <div class="play-button" onclick="toggleMusic()">
@@ -222,7 +267,6 @@
       <div class="menu-item">Cloths</div>
       <div class="menu-item">Shoes</div>
       <div class="menu-item">Accessories</div>
-      <div class="menu-item">Black people</div>
       <div class="menu-item">Curry</div>
       <div class="menu-item" onclick="location.href='swappable-heads.html'">Swappable Heads</div>
     </div>
@@ -236,7 +280,7 @@
         <img src="ricci shirt.jpg" alt="RICCI Shirt" />
         <div class="overlay">BALATON EXCLUSIVE.</div>
       </div>
-      <div class="price">£67</div>
+      <div class="price">£30</div>
       <a href="Buying.html" class="buy-button">Buy</a>
     </div>
 
@@ -245,7 +289,7 @@
         <img src="angry face RICCI.jpg" alt="Angry Face Shirt" />
         <div class="overlay">BALATON EXCLUSIVE.</div>
       </div>
-      <div class="price">£67</div>
+      <div class="price">£30</div>
       <a href="Buying.html" class="buy-button">Buy</a>
     </div>
 
@@ -254,7 +298,7 @@
         <img src="logo type RICCI shirt.jpg" alt="Logo Shirt" />
         <div class="overlay">BALATON EXCLUSIVE.</div>
       </div>
-      <div class="price">£67</div>
+      <div class="price">£30</div>
       <a href="Buying.html" class="buy-button">Buy</a>
     </div>
 
@@ -263,7 +307,7 @@
         <img src="ricci shoes.png" alt="RICCI Shoe" />
         <div class="overlay">BALATON EXCLUSIVE.</div>
       </div>
-      <div class="price">£67</div>
+      <div class="price">£44.99</div>
       <a href="Buying.html" class="buy-button">Buy</a>
     </div>
 
@@ -272,7 +316,7 @@
         <img src="ricci silver belt.png" alt="RICCI Belt" />
         <div class="overlay">BALATON EXCLUSIVE.</div>
       </div>
-      <div class="price">£67</div>
+      <div class="price">£24.99</div>
       <a href="Buying.html" class="buy-button">Buy</a>
     </div>
 
@@ -281,7 +325,7 @@
         <img src="ricci green cap.png" alt="RICCI Cap" />
         <div class="overlay">BALATON EXCLUSIVE.</div>
       </div>
-      <div class="price">£67</div>
+      <div class="price">£24.99</div>
       <a href="Buying.html" class="buy-button">Buy</a>
     </div>
 
@@ -290,7 +334,7 @@
         <img src="mad matt shirt.jpg" alt="mad matt" />
         <div class="overlay">BALATON EXCLUSIVE.</div>
       </div>
-      <div class="price">£67</div>
+      <div class="price">£30</div>
       <a href="Buying.html" class="buy-button">Buy</a>
     </div>
 
@@ -299,7 +343,7 @@
         <img src="high asf.jpg" alt="high asf" />
         <div class="overlay">BALATON EXCLUSIVE.</div>
       </div>
-      <div class="price">£67</div>
+      <div class="price">£30</div>
       <a href="Buying.html" class="buy-button">Buy</a>
     </div>
 
@@ -308,17 +352,139 @@
         <img src="detailed ricci.jpg" alt="detailed ricci" />
         <div class="overlay">BALATON EXCLUSIVE.</div>
       </div>
-      <div class="price">£67</div>
+      <div class="price">£30</div>
       <a href="Buying.html" class="buy-button">Buy</a>
     </div>
 
-   <div class="product">
+    <div class="product">
       <div class="product-image">
         <img src="oleg polo.jpg" alt="oleg polo" />
         <div class="overlay">BALATON EXCLUSIVE.</div>
       </div>
-      <div class="price">£67</div>
+      <div class="price">£40</div>
       <a href="Buying.html" class="buy-button">Buy</a>
     </div>
+
+    <div class="product">
+      <div class="product-image">
+        <img src="science room stuff.jpg" alt="science room stuff" />
+        <div class="overlay">BALATON EXCLUSIVE.</div>
+      </div>
+      <div class="price">£30</div>
+      <a href="Buying.html" class="buy-button">Buy</a>
+    </div>
+
+    <div class="product">
+      <div class="product-image">
+        <img src="high fight.jpg" alt="high fight" />
+        <div class="overlay">BALATON EXCLUSIVE.</div>
+       </div>
+       <div class="price">£30</div>
+       <a href="Buying.html" class="buy-button">Buy</a>
+    </div>
+
+    <div class="product">
+      <div class="product-image">
+        <img src="mmmm donuts.jpg" alt="mmmm donuts" />
+        <div class="overlay">BALATON EXCLUSIVE.</div>
+       </div>
+       <div class="price">£30</div>
+       <a href="Buying.html" class="buy-button">Buy</a>
+      </div>
+
+    <div class="product">
+      <div class="product-image">
+        <img src="i dont want to play seige.jpg" alt="IDWTPS" />
+        <div class="overlay">BALATON EXCLUSIVE.</div>
+       </div>
+       <div class="price">£30</div>
+       <a href="Buying.html" class="buy-button">Buy</a>
+      </div>
+
+    <div class="product">
+      <div class="product-image">
+        <img src="toby fantasy.jpg" alt="toby fantasy" />
+        <div class="overlay">BALATON EXCLUSIVE.</div>
+       </div>
+       <div class="price">£30</div>
+       <a href="Buying.html" class="buy-button">Buy</a>
+      </div>
+    </div>
+
+<!-- CREATORS SECTION -->
+<h2 style="text-align:center; margin-top: 60px; font-size: 2.2rem; letter-spacing: 2px;">
+  SERVICE TEAM
+</h2>
+
+<div class="creator-grid">
+
+  <!-- FIRST 5 CREATORS -->
+  <div class="creator">
+    <img src="matt face.jpeg" class="creator-img">
+    <div class="creator-name"><b>MATT BUCHAKHCHYAN</b></div>
+    <div class="creator-aka">AKA: MATVEY</div>
+    <div class="creator-desc">Ngl you can tell by the picture.</div>
   </div>
+
+  <div class="creator">
+    <img src="enzo face.jpeg" class="creator-img">
+    <div class="creator-name"><b>ENZO FEHER</b></div>
+    <div class="creator-aka">AKA: LOBSTER</div>
+    <div class="creator-desc">pretty cool guy , kinda fat and young. He exploded balloons with water in school and griefed everyone in minecraft with oleg.</div>
+  </div>
+
+  <div class="creator">
+    <img src="ansh face.jpeg" class="creator-img">
+    <div class="creator-name"><b>ANSH HANDE</b></div>
+    <div class="creator-aka">AKA: BO SINN</div>
+    <div class="creator-desc">He carried summer with his bo sinn name , also pretty chill.</div>
+  </div>
+
+  <div class="creator">
+    <img src="ben face.jpeg" class="creator-img">
+    <div class="creator-name"><b>BEN FEHER</b></div>
+    <div class="creator-aka">AKA: VIBENOS</div>
+    <div class="creator-desc">Good at rl and fn. Funny and tuff guy. probably most respected, made a veeerryyy good song which is what you hear when you press the red button.(top right corner)</div>
+  </div>
+
+  <div class="creator">
+    <img src="devesh kumar face.jpeg" class="creator-img">
+    <div class="creator-name"><b>DEVESH KUMAR</b></div>
+    <div class="creator-aka">AKA: DEVERSH KOMAROV</div>
+    <div class="creator-desc">Weeeellllll what can i say? fat and rapes dogs , but also most likely to succed.</div>
+  </div>
+
+   <div class="creator">
+    <img src="toby face.jpeg" class="creator-img">
+    <div class="creator-name"><b>TOBY WAITE</b></div>
+    <div class="creator-aka">AKA: TEETHBRUSH</div>
+    <div class="creator-desc">Very funny and has a stinky brother, farts a LOT , has good drawings as well.</div>
+  </div>
+
+</div>
+
+<!-- FINAL TWO CREATORS -->
+<h2 style="text-align:center; margin-top: 40px; font-size: 2rem;">
+  CREATORS/OWNERS
+</h2>
+
+<div class="creator-grid-2">
+
+  <div class="creator">
+    <img src="oleg face .jpeg" class="creator-img">
+    <div class="creator-name"><b>OLEKSII BILANOV</b></div>
+    <div class="creator-aka">AKA: OLEG LANDUSHIN/OLESKII PENCIL</div>
+    <div class="creator-desc">Fell out the window, shit at every game, fights with devesh a lot, exploded a deodorant, did whippets with Ben. But overall not too bad of a guy</div>
+  </div>
+
+  <div class="creator">
+    <img src="tyler face.jpeg" class="creator-img">
+    <div class="creator-name"><b>TYLER KNAPP</b></div>
+    <div class="creator-aka">AKA: ADJUNA GOES K-BOOM</div>
+    <div class="creator-desc">Funny and good at every game but also good at football and has two sausage dogs. Pretty much made the RICCI logo and has the best designs</div>
+  </div>
+
+</div>
+
+
   <div class="footer">– created by Tyler Knapp and Oleg Landushin>
