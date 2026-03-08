@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Cart</title>
+<style>
+    #cart-items{
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 25px;
+  max-width: 900px;
+  margin: 40px auto;
+  justify-items: center;
+}
+
+.cart-item{
+  width: 100%;
+  max-width: 260px;
+}
+body { font-family: Arial; background:#D4A017; text-align:center; padding:20px; }
+.cart-item { 
+    background: #D4A017; 
+    margin:10px auto; 
+    padding:30px 45px; 
+    display:flex; 
+    gap:15px; 
+    align-items:center; 
+    justify-content:flex-start; 
+    border-radius:10px; 
+    max-width:200px; 
+    box-shadow:0 4px 10px rgba(0,0,0,0.1);
+}
+.cart-item img { width: 150px; height:auto; border-radius:10px; }
+</style>
+</head>
+<body>
+
+<h1>Your Cart</h1>
+<div id="cart-items"></div>
+
+<script>
+let cart = JSON.parse(localStorage.getItem("cart")) || [];
+const container = document.getElementById("cart-items");
+
+function renderCart() {
+    container.innerHTML = ""; // clear previous content
+
+    // Combine duplicates
+    const combinedCart = {};
+    cart.forEach(item => {
+        const key = item.name + '|' + item.size;
+        if (combinedCart[key]) {
+            combinedCart[key].quantity += 1;
+        } else {
+            combinedCart[key] = { ...item, quantity: 1 };
+        }
+    });
+
+    const finalCart = Object.values(combinedCart);
+
+    if (finalCart.length === 0) {
+        container.innerHTML = "<p>Your cart is too empty. Get something.</p>";
+    } else {
+        finalCart.forEach(item => {
+            const div = document.createElement("div");
+            div.className = "cart-item";
+            div.innerHTML = `
+                <div>
+                    <strong>${item.name}</strong><br>
+                    Size: ${item.size}<br>
+                    Qty: ${item.quantity}
+                    <br><button class="remove-btn" style="margin-top:5px; cursor:pointer; border:none; background:none;">🗑️ Remove</button>
+                </div>
+                <img src="${item.image}" alt="${item.name}">
+            `;
+            container.appendChild(div);
+
+            // Remove button
+            const removeBtn = div.querySelector(".remove-btn");
+            removeBtn.addEventListener("click", () => {
+                cart = cart.filter(i => !(i.name === item.name && i.size === item.size));
+                localStorage.setItem("cart", JSON.stringify(cart));
+                renderCart(); // refresh cart
+            });
+        });
+    }
+}
+
+// Initial render
+renderCart();
+</script>
+
+</body>
+</html>
