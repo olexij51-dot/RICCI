@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Checkout</title>
+
+
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        font-family: Arial, sans-serif;
+        background: #D4A017;
+        text-align: center;
+    }
+
+    .checkout-container {
+        max-width: 500px;
+        margin: 40px auto;
+        background: none;
+        padding: 0;
+        border-radius: 0;
+        box-shadow: none;
+    }
+
+    .product-image {
+        width: 70%;
+        margin: 0 auto 20px auto;
+        display: block;
+        border-radius: 8px;
+    }
+
+
+    .sizes button {
+        padding: 10px 20px;
+        margin: 5px;
+        border: 2px solid #000000;
+        background: white;
+        cursor: pointer;
+        border-radius: 5px;
+        font-size: 1rem;
+    }
+
+    .sizes button:hover {
+        background: #d6b562;
+        color: white;
+    }
+
+    .sizes button.active {
+        background-color: #b38513; /* slightly darker than body background #D4A017 */
+        color: white;
+    }
+
+    .product-name {
+        font-size: 1.8rem;
+        font-weight: bold;
+        margin-top: 20px;
+    }
+
+    .description {
+        font-size: 1rem;
+        color: #000000;
+        margin-top: 10px;
+        line-height: 1.4;
+    }
+</style>
+</head>
+<body>
+
+    <div id="cart-counter" style="
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: black;
+    cursor: default;
+    z-index: 999;
+">
+  🛒 0
+</div>
+
+<div class="checkout-container">
+
+    <img id="product-image" class="product-image" src="" alt="Product">
+
+    <div id="sizes" class="sizes"></div>
+
+    <div id="product-name" class="product-name"></div>
+
+    <div id="product-description" class="description"></div>
+
+</div>
+
+<script>
+// --------------------------------------
+// 15 PRODUCTS — MATCHED TO YOUR LIST
+// --------------------------------------
+const products = {
+    "ricci-shirt": {
+        name: "Copper bull",
+        image: "ricci shirt.jpg",
+        sizes: ["S","M","L","XL","DEVESH"],
+        description: "First ever shirt made . original copper bull design. very cool."
+    },
+
+    "angry-face-ricci": {
+        name: "RICCI mascot",
+        image: "angry face RICCI.jpg",
+        sizes: ["S","M","L","XL","DEVESH"],
+        description: "One of the best . The first product to be made. RICCI mascot. Part of swappable heads."
+    },
+
+    "logo-type-ricci-shirt": {
+        name: "RICCI logo",
+        image: "logo type RICCI shirt.jpg",
+        sizes: ["S","M","L","XL","DEVESH"],
+        description: "The original logo.There was many different concepts . we went with this one."
+    },
+
+    "ricci-shoes": {
+        name: "Stupid alien",
+        image: "ricci shoes.png",
+        sizes: ["3","4","5","6","7","8","9","10","DEVESH"],
+        description: "Haha stupid alien. first came from a book at our schools librery. then evolved into this . it looks better from the side ."
+    },
+
+    "ricci-silver-belt": {
+        name: "RICCI silver belt",
+        image: "ricci silver belt.png",
+        sizes: ["One Size","DEVESH"],
+        description: "literally a silver belt . ment to clip between RIC and CI."
+    },
+
+    "ricci-green-cap": {
+        name: "RICCI Green Cap",
+        image: "ricci green cap.png",
+        sizes: ["One Size","DEVESH"],
+        description: "the gold chain made out of strings make it so tuff. Crazy how nobody thought of this before."
+    },
+
+    "mad-matt-shirt": {
+        name: "Mad Matt",
+        image: "mad matt shirt.jpg",
+        sizes: ["S","M","L","XL","DEVESH"],
+        description: "A cool shirt by Matt. drew this in the apple store in bazingstoke btw."
+    },
+
+    "high-asf": {
+        name: "High ASF",
+        image: "high asf.jpg",
+        sizes: ["S","M","L","XL","DEVESH"],
+        description: "made in the apple store in bazingstoke. i couldn't afford a good ipad back then."
+    },
+
+    "detailed-ricci": {
+        name: "u mad cuh",
+        image: "detailed ricci.jpg",
+        sizes: ["S","M","L","XL","DEVESH"],
+        description: "Artwork by Daniel Tegg . THis is the reason oleg should've taken art GSCE."
+    },
+
+    "oleg-polo": {
+        name: "Oleg Polo",
+        image: "oleg polo.jpg",
+        sizes: ["S","M","L","XL","DEVESH"],
+        description: "ermmm so the original picture comes from a school trip . and this is like the best photo of oleg ."
+    },
+
+    "science-room-stuff": {
+        name: "Science Room Stu££",
+        image: "science room stuff.jpg",
+        sizes: ["S","M","L","XL","DEVESH"],
+        description: "Its one of the best shirts ever clearly because RICCI was made in a science lesson. still miss those early RICCI times."
+    },
+
+    "high-fight": {
+        name: "High Fight",
+        image: "high fight.jpg",
+        sizes: ["S","M","L","XL","DEVESH"],
+        description: "early RICCI drawing and pls dont sue me mcdonalds."
+    },
+
+    "mmmm-donuts": {
+        name: "Mmmm Donuts",
+        image: "mmmm donuts.jpg",
+        sizes: ["S","M","L","XL","DEVESH"],
+        description: "Who doesnt like donuts . pls dont sue me . just a funny drawing."
+    },
+
+    "i-dont-want-to-play-seige": {
+        name: "I Don't Want To Play Siege",
+        image: "i dont want to play seige.jpg",
+        sizes: ["S","M","L","XL","DEVESH"],
+        description: "Devesh Kumar had a voice line . thats why the shirt is a thing."
+    },
+
+    "toby-fantasy": {
+        name: "Toby's dark fantasy",
+        image: "toby fantasy.jpg",
+        sizes: ["S","M","L","XL","DEVESH"],
+        description: "drawings by Toby Waite .At first i was scared of toby's drawings but now i like them so much."
+    }
+};
+
+const cartCounter = document.getElementById('cart-counter');
+cartCounter.addEventListener('click', () => {
+    window.location.href = 'cart.html'; // go to your cart page
+});
+
+// --------------------------------------
+// LOAD PRODUCT BASED ON URL
+// --------------------------------------
+const params = new URLSearchParams(window.location.search);
+const productId = params.get("product");
+const product = products[productId];
+
+if (product) {
+    document.getElementById("product-image").src = product.image;
+    document.getElementById("product-name").textContent = product.name;
+    document.getElementById("product-description").textContent = product.description;
+
+    const sizeContainer = document.getElementById("sizes");
+    sizeContainer.innerHTML = "";
+
+    product.sizes.forEach(size => {
+        const btn = document.createElement("button");
+        btn.textContent = size;
+
+        // NEW CODE: add click behavior
+        btn.addEventListener("click", () => {
+            sizeContainer.querySelectorAll("button").forEach(b => b.classList.remove("active"));
+            btn.classList.add("active");
+        });
+
+        sizeContainer.appendChild(btn);
+    });
+}
+
+if (product) {
+    const productImage = document.getElementById("product-image");
+    const productNameEl = document.getElementById("product-name");
+    const productDescEl = document.getElementById("product-description");
+    const sizeContainer = document.getElementById("sizes");
+
+    productImage.src = product.image;
+    productNameEl.textContent = product.name;
+    productDescEl.textContent = product.description;
+
+    sizeContainer.innerHTML = "";
+
+    // Create size buttons
+    product.sizes.forEach(size => {
+        const btn = document.createElement("button");
+        btn.textContent = size;
+
+        btn.addEventListener("click", () => {
+            sizeContainer.querySelectorAll("button").forEach(b => b.classList.remove("active"));
+            btn.classList.add("active");
+        });
+
+        sizeContainer.appendChild(btn);
+    });
+
+    // --- ADD TO CART ---
+    const cartCounter = document.getElementById('cart-counter');
+let cart = JSON.parse(localStorage.getItem('cart')) || [];
+cartCounter.textContent = `🛒 +${cart.length}`;
+
+// Create Add to Cart **text**
+const addToCartText = document.createElement("div"); // <div> instead of <button>
+addToCartText.textContent = "Add to Cart";
+addToCartText.style.marginTop = "15px";
+addToCartText.style.cursor = "pointer";       // pointer for clickable
+addToCartText.style.color = "black";          // text color
+addToCartText.style.fontWeight = "bold";
+
+sizeContainer.parentElement.appendChild(addToCartText);
+
+// Click logic
+addToCartText.addEventListener("click", () => {
+    const selectedSizeBtn = sizeContainer.querySelector('button.active');
+    if (!selectedSizeBtn) {
+        alert('Please select a size first!');
+        return;
+    }
+
+    const size = selectedSizeBtn.textContent;
+    const productName = product.name;
+
+    
+    cart.push({ 
+    name: productName, 
+    size: size, 
+    image: product.image // THIS IS CRUCIAL
+});
+    localStorage.setItem('cart', JSON.stringify(cart));
+
+    cartCounter.textContent = `🛒 +${cart.length}`;
+});
+  
+}
+</script>
+
+</body>
+</html>

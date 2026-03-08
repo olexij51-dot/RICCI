@@ -225,9 +225,32 @@
   color: #222;
 }
 
+.secret-number{
+  position:absolute;
+  bottom:-7px;
+  right:-5px;
+  font-size:18px;
+  font-weight:bold;
+  color:black;
+  background:#D4A017;
+  padding:2px 6px;
+  border-radius:4px;
+}
+
+
   </style>
 </head>
 <body>
+   <a href="cart.html" style="
+    position: fixed;
+    top: 80px;
+    right: 30px;
+    font-size: 24px;
+    text-decoration: none;
+    z-index: 2000;
+  ">
+  🛒
+  </a>
 
   <audio id="bg-music" loop>
     <source src="devesh is paki.mp3" type="audio/mpeg">
@@ -264,10 +287,14 @@
     </div>
 
     <div class="menu">
-      <div class="menu-item">Cloths</div>
-      <div class="menu-item">Shoes</div>
-      <div class="menu-item">Accessories</div>
-      <div class="menu-item">Curry</div>
+      <div class="menu-item" onclick="filterProducts('cloths')">Clothes</div>
+      <div class="menu-item" onclick="filterProducts('shoes')">Shoes</div>
+      <div class="menu-item" onclick="filterProducts('accessories')">Accessories</div>
+      <div class="menu-item" onclick="filterProducts('curry')">Curry</div>
+      <div class="menu-item" onclick="showServiceTeam()">Service Team</div>
+      <div class="menu-item" onclick="showAll()">Show All</div>
+      <div class="menu-item" onclick="location.href='ANTIRICCI boys page.html'">ANTIRICCI</div>
+      <div class="menu-item" onclick="location.href='Code.html'">You cant enter</div>
       <div class="menu-item" onclick="location.href='swappable-heads.html'">Swappable Heads</div>
     </div>
   </div>
@@ -275,145 +302,157 @@
   <header>RICCI</header>
 
   <div class="product-grid">
-    <div class="product">
-      <div class="product-image">
-        <img src="ricci shirt.jpg" alt="RICCI Shirt" />
-        <div class="overlay">BALATON EXCLUSIVE.</div>
-      </div>
-      <div class="price">£30</div>
-      <a href="Buying.html" class="buy-button">Buy</a>
-    </div>
 
-    <div class="product">
+  <div class="product" data-category="cloths">
+    <div class="product-image">
+      <img src="ricci shirt.jpg" alt="RICCI Shirt" />
+      <div class="overlay">BALATON EXCLUSIVE.</div>
+    </div>
+    <div class="price">£30</div>
+    <a href="checkout.html?product=ricci-shirt" class="buy-button">Buy</a>
+  </div>
+
+    <div class="product" data-category="cloths">
       <div class="product-image">
         <img src="angry face RICCI.jpg" alt="Angry Face Shirt" />
         <div class="overlay">BALATON EXCLUSIVE.</div>
       </div>
       <div class="price">£30</div>
-      <a href="Buying.html" class="buy-button">Buy</a>
+      <a href="checkout.html?product=angry-face-ricci" class="buy-button">Buy</a>
     </div>
 
-    <div class="product">
+    <div class="product" data-category="cloths">
       <div class="product-image">
         <img src="logo type RICCI shirt.jpg" alt="Logo Shirt" />
         <div class="overlay">BALATON EXCLUSIVE.</div>
+
+        <div class="secret-number">1</div>
+
       </div>
       <div class="price">£30</div>
-      <a href="Buying.html" class="buy-button">Buy</a>
+      <a href="checkout.html?product=logo-type-ricci-shirt" class="buy-button">Buy</a>
     </div>
 
-    <div class="product">
+    <div class="product" data-category="shoes">
       <div class="product-image">
         <img src="ricci shoes.png" alt="RICCI Shoe" />
         <div class="overlay">BALATON EXCLUSIVE.</div>
       </div>
       <div class="price">£44.99</div>
-      <a href="Buying.html" class="buy-button">Buy</a>
+      <a href="checkout.html?product=ricci-shoes" class="buy-button">Buy</a>
     </div>
 
-    <div class="product">
+    <div class="product" data-category="Accessories">
       <div class="product-image">
         <img src="ricci silver belt.png" alt="RICCI Belt" />
         <div class="overlay">BALATON EXCLUSIVE.</div>
       </div>
       <div class="price">£24.99</div>
-      <a href="Buying.html" class="buy-button">Buy</a>
+      <a href="checkout.html?product=ricci-silver-belt" class="buy-button">Buy</a>
     </div>
 
-    <div class="product">
+
+    <div class="product" data-category="Accessories">
       <div class="product-image">
         <img src="ricci green cap.png" alt="RICCI Cap" />
         <div class="overlay">BALATON EXCLUSIVE.</div>
       </div>
       <div class="price">£24.99</div>
-      <a href="Buying.html" class="buy-button">Buy</a>
+      <a href="checkout.html?product=ricci-green-cap" class="buy-button">Buy</a>
     </div>
 
-    <div class="product">
+    <div class="product" data-category="cloths">
       <div class="product-image">
         <img src="mad matt shirt.jpg" alt="mad matt" />
         <div class="overlay">BALATON EXCLUSIVE.</div>
       </div>
       <div class="price">£30</div>
-      <a href="Buying.html" class="buy-button">Buy</a>
+      <a href="checkout.html?product=mad-matt-shirt" class="buy-button">Buy</a>
     </div>
 
-   <div class="product">
+   <div class="product" data-category="cloths">
       <div class="product-image">
         <img src="high asf.jpg" alt="high asf" />
         <div class="overlay">BALATON EXCLUSIVE.</div>
       </div>
       <div class="price">£30</div>
-      <a href="Buying.html" class="buy-button">Buy</a>
+      <a href="checkout.html?product=high-asf" class="buy-button">Buy</a>
     </div>
 
-    <div class="product">
+
+    <div class="product" data-category="cloths">
       <div class="product-image">
         <img src="detailed ricci.jpg" alt="detailed ricci" />
         <div class="overlay">BALATON EXCLUSIVE.</div>
       </div>
       <div class="price">£30</div>
-      <a href="Buying.html" class="buy-button">Buy</a>
+      <a href="checkout.html?product=detailed-ricci" class="buy-button">Buy</a>
     </div>
 
-    <div class="product">
+
+    <div class="product" data-category="cloths">
       <div class="product-image">
         <img src="oleg polo.jpg" alt="oleg polo" />
         <div class="overlay">BALATON EXCLUSIVE.</div>
       </div>
       <div class="price">£40</div>
-      <a href="Buying.html" class="buy-button">Buy</a>
+      <a href="checkout.html?product=oleg-polo" class="buy-button">Buy</a>
     </div>
 
-    <div class="product">
+
+    <div class="product" data-category="cloths">
       <div class="product-image">
         <img src="science room stuff.jpg" alt="science room stuff" />
         <div class="overlay">BALATON EXCLUSIVE.</div>
       </div>
       <div class="price">£30</div>
-      <a href="Buying.html" class="buy-button">Buy</a>
+      <a href="checkout.html?product=science-room-stuff" class="buy-button">Buy</a>
     </div>
 
-    <div class="product">
+
+    <div class="product" data-category="cloths">
       <div class="product-image">
         <img src="high fight.jpg" alt="high fight" />
         <div class="overlay">BALATON EXCLUSIVE.</div>
        </div>
        <div class="price">£30</div>
-       <a href="Buying.html" class="buy-button">Buy</a>
+       <a href="checkout.html?product=high-fight" class="buy-button">Buy</a>
     </div>
 
-    <div class="product">
+
+    <div class="product" data-category="cloths">
       <div class="product-image">
         <img src="mmmm donuts.jpg" alt="mmmm donuts" />
         <div class="overlay">BALATON EXCLUSIVE.</div>
        </div>
        <div class="price">£30</div>
-       <a href="Buying.html" class="buy-button">Buy</a>
+       <a href="checkout.html?product=mmmm-donuts" class="buy-button">Buy</a>
       </div>
 
-    <div class="product">
+    <div class="product" data-category="cloths">
       <div class="product-image">
         <img src="i dont want to play seige.jpg" alt="IDWTPS" />
         <div class="overlay">BALATON EXCLUSIVE.</div>
        </div>
        <div class="price">£30</div>
-       <a href="Buying.html" class="buy-button">Buy</a>
+       <a href="checkout.html?product=i-dont-want-to-play-seige" class="buy-button">Buy</a>
       </div>
 
-    <div class="product">
+    <div class="product" data-category="cloths">
       <div class="product-image">
         <img src="toby fantasy.jpg" alt="toby fantasy" />
         <div class="overlay">BALATON EXCLUSIVE.</div>
        </div>
        <div class="price">£30</div>
-       <a href="Buying.html" class="buy-button">Buy</a>
+       <a href="checkout.html?product=toby-fantasy" class="buy-button">Buy</a>
       </div>
     </div>
+  
+  <div id="service-team">
 
 <!-- CREATORS SECTION -->
 <h2 style="text-align:center; margin-top: 60px; font-size: 2.2rem; letter-spacing: 2px;">
-  SERVICE TEAM
+  SER<span id="secretV" onclick="turnToFour()">V</span>ICE TEAM
 </h2>
 
 <div class="creator-grid">
@@ -444,7 +483,7 @@
     <img src="ben face.jpeg" class="creator-img">
     <div class="creator-name"><b>BEN FEHER</b></div>
     <div class="creator-aka">AKA: VIBENOS</div>
-    <div class="creator-desc">Good at rl and fn. Funny and tuff guy. probably most respected, made a veeerryyy good song which is what you hear when you press the red button.(top right corner)</div>
+    <div class="creator-desc">Good at rl and fn. Funny and tuff guy. probably most respected, made a veeerryyy good song which is what you hear when you press the red button.(top left corner)</div>
   </div>
 
   <div class="creator">
@@ -483,8 +522,72 @@
     <div class="creator-aka">AKA: ADJUNA GOES K-BOOM</div>
     <div class="creator-desc">Funny and good at every game but also good at football and has two sausage dogs. Pretty much made the RICCI logo and has the best designs</div>
   </div>
-
+ </div>
 </div>
 
 
-  <div class="footer">– created by Tyler Knapp and Oleg Landushin>
+  <div class="footer">– created by Tyler Knapp and Oleg Landushin</div>
+<script>
+
+
+  function showAll() {
+  const products = document.querySelectorAll(".product");
+  const team = document.getElementById("service-team");
+
+  products.forEach(product => {
+    product.style.display = "block"; // show all products
+  });
+
+  if (team) {
+    team.style.display = "block"; // show the service team again
+  }
+}
+
+function showServiceTeam() {
+  const products = document.querySelectorAll(".product");
+  const team = document.getElementById("service-team");
+
+  // Hide all products
+  products.forEach(product => {
+    product.style.display = "none";
+  });
+
+  // Show the service team
+  if (team) {
+    team.style.display = "block";
+  }
+}
+
+</script>
+  <script>
+
+function filterProducts(category) {
+  const products = document.querySelectorAll(".product");
+  const team = document.getElementById("service-team");
+
+  products.forEach(product => {
+    if (product.dataset.category.toLowerCase() === category.toLowerCase()) {
+      product.style.display = "block";
+    } else {
+      product.style.display = "none";
+    }
+  });
+
+  if (team) {
+    team.style.display = "none";
+  }
+}
+
+
+
+function turnToFour(){
+  const v = document.getElementById("secretV");
+  v.textContent = "4";
+}
+
+
+
+</script>
+
+</body>
+</html>

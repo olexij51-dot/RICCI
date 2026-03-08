@@ -121,53 +121,85 @@
   <button onclick="resetFaces()">Reset All Faces</button>
 
   <script>
-    let currentDrag = null;
-    let offsetX = 0;
-    let offsetY = 0;
+    
+let currentDrag = null;
+let offsetX = 0;
+let offsetY = 0;
 
-    document.querySelectorAll('.faces img').forEach(face => {
-      face.addEventListener('mousedown', e => {
-        const clone = face.cloneNode(true);
-        clone.classList.add('draggable-face', 'drag-preview');
-        clone.style.left = `${e.pageX - 50}px`;
-        clone.style.top = `${e.pageY - 50}px`;
-        document.body.appendChild(clone);
-        currentDrag = clone;
-        offsetX = e.offsetX;
-        offsetY = e.offsetY;
-      });
-    });
+// --- make tray images draggable ---
+document.querySelectorAll('.faces img').forEach(face => {
+  face.classList.add('tray'); // mark tray images
 
-    document.addEventListener('mousemove', e => {
-      if (currentDrag) {
-        currentDrag.style.left = `${e.pageX - offsetX}px`;
-        currentDrag.style.top = `${e.pageY - offsetY}px`;
-      }
-    });
+  face.addEventListener('mousedown', e => {
+    // create clone for dragging
+    const clone = face.cloneNode(true);
+    clone.classList.add('draggable-face');
+    clone.classList.remove('tray'); // mark as placed
+    clone.style.position = 'absolute';
+    clone.style.zIndex = 1000;
+    clone.style.left = `${e.pageX - e.offsetX}px`;
+    clone.style.top = `${e.pageY - e.offsetY}px`;
+    document.body.appendChild(clone);
 
-    document.addEventListener('mouseup', () => {
-      if (currentDrag) {
-        currentDrag.classList.remove('drag-preview');
-        currentDrag.draggable = true;
+    currentDrag = clone;
+    offsetX = e.offsetX;
+    offsetY = e.offsetY;
 
-        currentDrag.addEventListener('dragstart', e => {
-          offsetX = e.offsetX;
-          offsetY = e.offsetY;
-        });
+    // --- show red "8" under sh6 ---
+    if (face.getAttribute('src') === 'sh6.png') {
+      const numberLabel = document.createElement('div');
+      numberLabel.textContent = '8';
+      numberLabel.style.position = 'absolute';
+      numberLabel.style.left = `${e.pageX - 10}px`; // adjust to center
+      numberLabel.style.top = `${e.pageY + 60}px`; // below head
+      numberLabel.style.color = 'red';             // red color
+      numberLabel.style.fontSize = '30px';
+      numberLabel.style.fontWeight = 'bold';
+      numberLabel.classList.add('draggable-number');
+      document.body.appendChild(numberLabel);
 
-        currentDrag.addEventListener('dragend', e => {
-          currentDrag.style.left = `${e.pageX - offsetX}px`;
-          currentDrag.style.top = `${e.pageY - offsetY}px`;
-        });
-
-        currentDrag = null;
-      }
-    });
-
-    function resetFaces() {
-      document.querySelectorAll('.draggable-face').forEach(img => img.remove());
-      location.reload();
+      // attach number to clone so it moves together
+      clone.numberLabel = numberLabel;
     }
+  });
+});
+
+// --- allow dragging of any placed head ---
+document.addEventListener('mousedown', e => {
+  const target = e.target;
+  if (target.classList.contains('draggable-face')) {
+    currentDrag = target;
+    target.style.position = 'absolute';
+    target.style.zIndex = 1000;
+    offsetX = e.offsetX;
+    offsetY = e.offsetY;
+  }
+});
+
+// --- move head (and number if exists) ---
+document.addEventListener('mousemove', e => {
+  if (currentDrag) {
+    currentDrag.style.left = `${e.pageX - offsetX}px`;
+    currentDrag.style.top = `${e.pageY - offsetY}px`;
+
+    if (currentDrag.numberLabel) {
+      currentDrag.numberLabel.style.left = `${e.pageX - 10}px`;
+      currentDrag.numberLabel.style.top = `${e.pageY + 60}px`;
+    }
+  }
+});
+
+// --- drop head ---
+document.addEventListener('mouseup', () => {
+  currentDrag = null;
+});
+
+// --- reset placed heads and numbers ---
+function resetFaces() {
+  document.querySelectorAll('.draggable-face').forEach(img => img.remove());
+  document.querySelectorAll('.draggable-number').forEach(num => num.remove());
+}
+ 
   </script>
 
 </body>

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Have You Seen This Man</title>
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        background: #D4A017;
+        color: rgb(0, 0, 0);
+        font-family: Arial, sans-serif;
+        text-align: center;
+    }
+
+    h1, h2 {
+        margin: 0;
+        padding: 20px 0;
+        width: 100%;
+        font-size: 3rem;
+        font-weight: bold;
+    }
+
+    .image-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 40px 0;
+    }
+
+    .image-container img {
+        width: 50%; 
+        height: auto;
+        border-radius: 5px;
+    }
+</style>
+</head>
+<body>
+
+<h1>HAVE YOU SEEN THIS MAN</h1>
+
+<div class="image-container">
+    <img src="ANTIRICCI boy1.jpg" alt="Man">
+</div>
+
+<h2 id="dreamText">IN YOUR DREAMS?</h2>
+
+<script>
+    document.getElementById("dreamText").addEventListener("click", function () {
+        this.textContent = this.textContent.replace("?", "8");
+    });
+</script>
+
+
+</body>
+</html>
