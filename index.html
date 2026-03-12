@@ -101,34 +101,66 @@
       color: #666;
     }
 
-    .play-button {
-      position: fixed;
-      top: 5px;
-      left: 5px;
-      width: 24px;
-      height: 24px;
-      background-color: red;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      box-shadow: 0 0 6px rgba(0,0,0,0.2);
-      z-index: 1002;
-      transition: transform 0.2s ease;
-    }
+   .ricci-flags {
+    position: fixed;
+    top: 30px; /* adjust to where you want it vertically */
+    left: 0;    /* flush against screen edge */
+    z-index: 1000;   
+}
 
-    .play-button span {
-      color: white;
-      font-size: 0.9rem;
-      font-weight: bold;
-      line-height: 1;
-      margin-left: 1px;
-    }
+.ricci-flags .flag {
+    width: 200px;
+    height: 45px;
+    background: #b38513;
+    color: white;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    padding-left: 15px;
+    cursor: pointer;
+    pointer-events: auto;
+    z-index: 1000;
+    
 
-    .play-button:hover {
-      transform: scale(1.1);
-    }
+    /* shape: rectangle + right triangle */
+    clip-path: polygon(
+        0 0,
+        85% 0,
+        100% 0%,
+        80% 100%,
+        0 100%
+    );
+
+    /* collapsed state */
+    transform: translateX(-220px);
+    transition: transform 0.35s ease, scale 0.2s ease;
+    scale: 1;
+
+}
+.ricci-flags .flag:first-child {
+    transform: translateX(-160px);
+}
+
+.ricci-flags .arrow-right {
+    position: absolute;
+    top: 0;                   /* align with the first flag */
+    left: 50px;              /* adjust so it’s right of first flag */
+    font-size: 2rem;          /* makes arrow bigger */
+    line-height: 45px;        /* vertically center with flag height */
+    color: black;             /* arrow color */
+    z-index: -1000;
+}
+
+/* slight grow on hover */
+.ricci-flags .flag:hover {
+    scale: 1.07;
+}
+
+/* active song icon */
+.ricci-flags .flag.active::after {
+    content: "🎵";
+    margin-left: 10px;
+}
 
     .menu-wrapper {
       position: fixed;
@@ -252,31 +284,22 @@
   🛒
   </a>
 
-  <audio id="bg-music" loop>
-    <source src="devesh-is-paki.mp3" type="audio/mpeg">
-  </audio>
+ <div class="ricci-flags">
+    <div class="flag" data-index="0">Devesh is</div>
+    <div class="arrow-right">←</div>
+    <div class="flag" data-index="1">Paki boy</div>
+    <div class="flag" data-index="2">Oleg Bday</div>
+    <div class="flag" data-index="3">Devesh is(rap)</div>
+    <div class="flag" data-index="4">Song 5</div>
+</div>
 
-  <div class="play-button" onclick="toggleMusic()">
-    <span id="play-icon">▶</span>
-  </div>
+<audio id="ricci-audio">
+  <source src="" type="audio/mpeg">
+  Your browser does not support the audio element.
+</audio>
 
   <script>
-    let isPlaying = false;
-
-    function toggleMusic() {
-      const audio = document.getElementById('bg-music');
-      const icon = document.getElementById('play-icon');
-
-      if (isPlaying) {
-        audio.pause();
-        icon.textContent = '▶';
-      } else {
-        audio.play();
-        icon.textContent = '⏸';
-      }
-
-      isPlaying = !isPlaying;
-    }
+  
   </script>
 
   <div class="menu-wrapper">
@@ -459,42 +482,42 @@
 
   <!-- FIRST 5 CREATORS -->
   <div class="creator">
-    <img src="matt-face.jpeg" class="creator-img">
+    <img src="matt-face.jpg" class="creator-img">
     <div class="creator-name"><b>MATT BUCHAKHCHYAN</b></div>
-    <div class="creator-aka">AKA: MATVEY</div>
-    <div class="creator-desc">Ngl you can tell by the picture.</div>
+    <div class="creator-aka">AKA: RICHMILIONER</div>
+    <div class="creator-desc">sometimes chill , sometimes happy and sometimes sad .And all for no reason✌️. Tf is wrong with him.</div>
   </div>
 
   <div class="creator">
-    <img src="enzo-face.jpeg" class="creator-img">
+    <img src="enzo-face.jpg" class="creator-img">
     <div class="creator-name"><b>ENZO FEHER</b></div>
     <div class="creator-aka">AKA: LOBSTER</div>
     <div class="creator-desc">pretty cool guy , kinda fat and young. He exploded balloons with water in school and griefed everyone in minecraft with oleg.</div>
   </div>
 
   <div class="creator">
-    <img src="ansh-face.jpeg" class="creator-img">
-    <div class="creator-name"><b>ANSH HANDE</b></div>
-    <div class="creator-aka">AKA: BO SINN</div>
-    <div class="creator-desc">He carried summer with his bo sinn name , also pretty chill.</div>
+    <img src="hendryx-face.jpg" class="creator-img">
+    <div class="creator-name"><b>HENDYX</b></div>
+    <div class="creator-aka">AKA: HENDRYX</div>
+    <div class="creator-desc">Best RICCI abunda affiliated member. Also the smartest and absolutely fucking tuff.</div>
   </div>
 
   <div class="creator">
-    <img src="ben-face.jpeg" class="creator-img">
+    <img src="ben-face.jpg" class="creator-img">
     <div class="creator-name"><b>BEN FEHER</b></div>
     <div class="creator-aka">AKA: VIBENOS</div>
     <div class="creator-desc">Good at rl and fn. Funny and tuff guy. probably most respected, made a veeerryyy good song which is what you hear when you press the red button.(top left corner)</div>
   </div>
 
   <div class="creator">
-    <img src="devesh-kumar-face.jpeg" class="creator-img">
+    <img src="devesh-kumar-face.jpg" class="creator-img">
     <div class="creator-name"><b>DEVESH KUMAR</b></div>
     <div class="creator-aka">AKA: DEVERSH KOMAROV</div>
     <div class="creator-desc">Weeeellllll what can i say? fat and rapes dogs , but also most likely to succed.</div>
   </div>
 
    <div class="creator">
-    <img src="toby-face.jpeg" class="creator-img">
+    <img src="toby-face.jpg" class="creator-img">
     <div class="creator-name"><b>TOBY WAITE</b></div>
     <div class="creator-aka">AKA: TEETHBRUSH</div>
     <div class="creator-desc">Very funny and has a stinky brother, farts a LOT , has good drawings as well.</div>
@@ -510,14 +533,14 @@
 <div class="creator-grid-2">
 
   <div class="creator">
-    <img src="oleg-face.jpeg" class="creator-img">
+    <img src="oleg-face.jpg" class="creator-img">
     <div class="creator-name"><b>OLEKSII BILANOV</b></div>
     <div class="creator-aka">AKA: OLEG LANDUSHIN/OLESKII PENCIL</div>
     <div class="creator-desc">Fell out the window, shit at every game, fights with devesh a lot, exploded a deodorant, did whippets with Ben. But overall not too bad of a guy</div>
   </div>
 
   <div class="creator">
-    <img src="tyler-face.jpeg" class="creator-img">
+    <img src="tyler-face.jpg" class="creator-img">
     <div class="creator-name"><b>TYLER KNAPP</b></div>
     <div class="creator-aka">AKA: ADJUNA GOES K-BOOM</div>
     <div class="creator-desc">Funny and good at every game but also good at football and has two sausage dogs. Pretty much made the RICCI logo and has the best designs</div>
@@ -527,6 +550,90 @@
 
 
   <div class="footer">– created by Tyler Knapp and Oleg Landushin</div>
+
+<script>
+const flags = document.querySelectorAll(".ricci-flags .flag");
+const container = document.querySelector(".ricci-flags");
+
+let menuOpen = false;
+let animating = false;
+
+// OPEN
+flags[0].addEventListener("mouseenter", () => {
+    if (menuOpen || animating) return;
+
+    animating = true;
+
+    flags.forEach((flag, i) => {
+        setTimeout(() => {
+            flag.style.transform = "translateX(0)";
+
+            if (i === flags.length - 1) {
+                menuOpen = true;
+                animating = false;
+            }
+
+        }, i * 120);
+    });
+});
+
+// CLOSE
+container.addEventListener("mouseleave", () => {
+    if (!menuOpen || animating) return;
+
+    animating = true;
+
+    [...flags].reverse().forEach((flag, i) => {
+        setTimeout(() => {
+
+            if (flag.dataset.index == "0") {
+                flag.style.transform = "translateX(-160px)";
+            } else {
+                flag.style.transform = "translateX(-220px)";
+            }
+
+            if (i === flags.length - 1) {
+                menuOpen = false;
+                animating = false;
+            }
+
+        }, i * 120);
+    });
+});
+
+// Active song indicator
+flags.forEach(flag => {
+    flag.addEventListener("click", () => {
+        flags.forEach(f => f.classList.remove("active"));
+        flag.classList.add("active");
+    });
+});
+
+const audio = document.getElementById("ricci-audio");
+
+// List your songs in order of the flags (top-left is index 0)
+const songs = [
+  "devesh-is-gay-boosted.mp3", // first pole
+  "paki-boy.mp3", // second pole
+  "oleg-birthday.mp3", // third pole
+  "devesh-is-gay-rap.mp3", // fourth pole
+  "song4.mp3"  // fifth pole
+];
+
+flags.forEach(flag => {
+    flag.addEventListener("click", () => {
+        // Remove active class from all flags
+        flags.forEach(f => f.classList.remove("active"));
+        flag.classList.add("active");
+
+        const index = flag.dataset.index; // which flag was clicked
+        audio.src = songs[index];         // change audio source
+        audio.currentTime = 0;            // rewind to start
+        audio.play();                     // play the song
+    });
+});
+</script>
+
 <script>
 
 
@@ -587,6 +694,69 @@ function turnToFour(){
 
 
 
+</script>
+
+<style>
+  
+
+/* Only apply hover styles on devices that support hover */
+@media (hover: hover) {
+  .product-image:hover .overlay {
+    opacity: 1;
+  }
+
+  .buy-button:hover {
+    background-color: #76d976;
+    transform: scale(1.05);
+  }
+
+  .ricci-flags .flag:hover {
+    scale: 1.07;
+  }
+
+  .menu-wrapper:hover .menu,
+  .menu:hover {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+}
+
+/* Mobile / touch devices: tap effect handled via JS */
+@media (hover: none) {
+  .product-image .overlay {
+    opacity: 0;
+  }
+
+  .product-image.show-overlay .overlay {
+    opacity: 1;
+  }
+}
+</style>
+
+
+<script>
+  // Only run on touch devices
+  if ('ontouchstart' in window || navigator.maxTouchPoints) {
+    const products = document.querySelectorAll(".product");
+
+    products.forEach(product => {
+      const overlay = product.querySelector(".overlay");
+
+      product.addEventListener("click", () => {
+        // Remove overlay from others
+        products.forEach(p => p.classList.remove("show-overlay"));
+
+        // Show overlay for this product
+        product.classList.add("show-overlay");
+
+        // Hide after 2 seconds
+        setTimeout(() => {
+          product.classList.remove("show-overlay");
+        }, 2000);
+      });
+    });
+  }
 </script>
 
 </body>
