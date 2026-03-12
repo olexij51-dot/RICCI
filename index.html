@@ -736,27 +736,107 @@ function turnToFour(){
 
 
 <script>
-  // Only run on touch devices
-  if ('ontouchstart' in window || navigator.maxTouchPoints) {
-    const products = document.querySelectorAll(".product");
+if ('ontouchstart' in window || navigator.maxTouchPoints) {
+  const products = document.querySelectorAll(".product");
 
-    products.forEach(product => {
-      const overlay = product.querySelector(".overlay");
+  // Store timeout per product
+  const timeouts = new Map();
 
-      product.addEventListener("click", () => {
-        // Remove overlay from others
-        products.forEach(p => p.classList.remove("show-overlay"));
+  products.forEach(product => {
+    product.addEventListener("click", () => {
+      // Clear any existing timeout for this product
+      if (timeouts.has(product)) {
+        clearTimeout(timeouts.get(product));
+      }
 
-        // Show overlay for this product
-        product.classList.add("show-overlay");
+      // Show overlay
+      product.classList.add("show-overlay");
 
-        // Hide after 2 seconds
+      // Set new timeout to hide overlay after 2 seconds
+      const timeoutId = setTimeout(() => {
+        product.classList.remove("show-overlay");
+        timeouts.delete(product);
+      }, 2000);
+
+      // Save timeout
+      timeouts.set(product, timeoutId);
+    });
+  });
+}
+
+</script>
+
+<script>
+const menuWrapper = document.querySelector(".menu-wrapper");
+const menu = menuWrapper.querySelector(".menu");
+const menuIcon = menuWrapper.querySelector(".menu-icon");
+
+menuIcon.addEventListener("click", () => {
+  menu.classList.toggle("open");
+});
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const flags = document.querySelectorAll(".ricci-flags .flag");
+  const flagsContainer = document.querySelector(".ricci-flags");
+  const audio = document.getElementById("ricci-audio");
+
+  // Mobile / touch detection
+  const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints;
+
+  if (isTouch) {
+    // Open flags menu when first flag is tapped
+    flags[0].addEventListener("click", (e) => {
+      e.stopPropagation(); 
+      flags.forEach((flag, i) => {
         setTimeout(() => {
-          product.classList.remove("show-overlay");
-        }, 2000);
+          flag.style.transform = "translateX(0)";
+        }, i * 120);
       });
     });
+
+    // Close flags menu when tapping anywhere else
+    document.body.addEventListener("click", () => {
+      [...flags].reverse().forEach((flag, i) => {
+        setTimeout(() => {
+          if (flag.dataset.index == "0") {
+            flag.style.transform = "translateX(-160px)";
+          } else {
+            flag.style.transform = "translateX(-220px)";
+          }
+        }, i * 120);
+      });
+    });
+
+    // Prevent clicks inside the container from closing
+    flagsContainer.addEventListener("click", (e) => {
+      e.stopPropagation();
+    });
   }
+
+  // Play song on click
+  flags.forEach(flag => {
+    flag.addEventListener("click", (e) => {
+      e.stopPropagation();
+
+      flags.forEach(f => f.classList.remove("active"));
+      flag.classList.add("active");
+
+      const index = flag.dataset.index;
+      const songs = [
+        "devesh-is-gay-boosted.mp3",
+        "paki-boy.mp3",
+        "oleg-birthday.mp3",
+        "devesh-is-gay-rap.mp3",
+        "song4.mp3"
+      ];
+      audio.src = songs[index];
+      audio.currentTime = 0;
+      audio.play();
+    });
+  });
+});
 </script>
 
 </body>
