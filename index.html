@@ -777,66 +777,42 @@ menuIcon.addEventListener("click", () => {
 </script>
 
 <script>
-document.addEventListener("DOMContentLoaded", () => {
-  const flags = document.querySelectorAll(".ricci-flags .flag");
-  const flagsContainer = document.querySelector(".ricci-flags");
-  const audio = document.getElementById("ricci-audio");
+// Mobile / touch detection
+const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints;
 
-  // Mobile / touch detection
-  const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints;
+// Select flags
 
-  if (isTouch) {
-    // Open flags menu when first flag is tapped
-    flags[0].addEventListener("click", (e) => {
-      e.stopPropagation(); 
-      flags.forEach((flag, i) => {
-        setTimeout(() => {
-          flag.style.transform = "translateX(0)";
-        }, i * 120);
-      });
-    });
+const flagsContainer = document.querySelector(".ricci-flags");
 
-    // Close flags menu when tapping anywhere else
-    document.body.addEventListener("click", () => {
-      [...flags].reverse().forEach((flag, i) => {
-        setTimeout(() => {
-          if (flag.dataset.index == "0") {
-            flag.style.transform = "translateX(-160px)";
-          } else {
-            flag.style.transform = "translateX(-220px)";
-          }
-        }, i * 120);
-      });
-    });
-
-    // Prevent clicks inside the container from closing
-    flagsContainer.addEventListener("click", (e) => {
-      e.stopPropagation();
-    });
-  }
-
-  // Play song on click
-  flags.forEach(flag => {
-    flag.addEventListener("click", (e) => {
-      e.stopPropagation();
-
-      flags.forEach(f => f.classList.remove("active"));
-      flag.classList.add("active");
-
-      const index = flag.dataset.index;
-      const songs = [
-        "devesh-is-gay-boosted.mp3",
-        "paki-boy.mp3",
-        "oleg-birthday.mp3",
-        "devesh-is-gay-rap.mp3",
-        "song4.mp3"
-      ];
-      audio.src = songs[index];
-      audio.currentTime = 0;
-      audio.play();
+if (isTouch) {
+  // Open flags menu when first flag is tapped
+  flags[0].addEventListener("click", (e) => {
+    e.stopPropagation(); // prevent immediate close
+    flags.forEach((flag, i) => {
+      setTimeout(() => {
+        flag.style.transform = "translateX(0)";
+      }, i * 120);
     });
   });
-});
+
+  // Close flags menu when tapping anywhere else
+  document.body.addEventListener("click", () => {
+    [...flags].reverse().forEach((flag, i) => {
+      setTimeout(() => {
+        if (flag.dataset.index == "0") {
+          flag.style.transform = "translateX(-160px)";
+        } else {
+          flag.style.transform = "translateX(-220px)";
+        }
+      }, i * 120);
+    });
+  });
+
+  // Stop clicks on flags from closing themselves
+  flagsContainer.addEventListener("click", (e) => {
+    e.stopPropagation();
+  });
+}
 </script>
 
 </body>
