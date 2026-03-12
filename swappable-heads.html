@@ -122,9 +122,7 @@
 
   <script>
     
-let currentDrag = null;
-let offsetX = 0;
-let offsetY = 0;
+
 
 // --- make tray images draggable ---
 document.querySelectorAll('.faces img').forEach(face => {
@@ -195,6 +193,120 @@ document.addEventListener('mouseup', () => {
 });
 
 // --- reset placed heads and numbers ---
+function resetFaces() {
+  document.querySelectorAll('.draggable-face').forEach(img => img.remove());
+  document.querySelectorAll('.draggable-number').forEach(num => num.remove());
+}
+
+let currentDrag = null;
+let offsetX = 0;
+let offsetY = 0;
+
+// Helper to get pointer coordinates
+function getEventPos(e) {
+  if (e.touches && e.touches.length > 0) {
+    return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+  } else {
+    return { x: e.clientX, y: e.clientY };
+  }
+}
+
+// --- start dragging a head from tray ---
+document.querySelectorAll('.faces img').forEach(face => {
+  face.classList.add('tray');
+
+  function startDrag(e) {
+
+  // ⭐ Prevent creating a clone if clicking an already placed head
+  if (e.target.classList.contains('draggable-face')) return;
+
+  e.preventDefault();
+  const pos = getEventPos(e);
+    
+
+    // create clone
+    const clone = face.cloneNode(true);
+    clone.classList.add('draggable-face');
+    clone.classList.remove('tray');
+    clone.style.position = 'absolute';
+    clone.style.zIndex = 1000;
+    document.body.appendChild(clone);
+
+    // calculate offset from pointer to element top-left
+    const rect = clone.getBoundingClientRect();
+    offsetX = pos.x - rect.left;
+    offsetY = pos.y - rect.top;
+
+    // place element under pointer
+    clone.style.left = `${e.pageX - 70}px`;
+    clone.style.top = `${e.pageY - 70}px`;
+
+    currentDrag = clone;
+
+    // optional: red number for sh6
+    if (face.getAttribute('src') === 'sh6.png') {
+      const numberLabel = document.createElement('div');
+      numberLabel.textContent = '8';
+      numberLabel.style.position = 'absolute';
+      numberLabel.style.left = (pos.x - 10) + 'px';
+      numberLabel.style.top = (pos.y + 60) + 'px';
+      numberLabel.style.color = 'red';
+      numberLabel.style.fontSize = '30px';
+      numberLabel.style.fontWeight = 'bold';
+      numberLabel.classList.add('draggable-number');
+      document.body.appendChild(numberLabel);
+      clone.numberLabel = numberLabel;
+    }
+  }
+
+  face.addEventListener('mousedown', startDrag);
+  face.addEventListener('touchstart', startDrag, { passive: false });
+});
+
+// --- drag already placed head ---
+function startPlacedDrag(e) {
+  const target = e.target;
+  if (!target.classList.contains('draggable-face')) return;
+
+  e.preventDefault();
+  e.stopPropagation(); // ⭐ prevents new clone from being created
+  const pos = getEventPos(e);
+  currentDrag = target;
+
+  const rect = target.getBoundingClientRect();
+  offsetX = pos.x - rect.left;
+  offsetY = pos.y - rect.top;
+}
+
+document.addEventListener('mousedown', startPlacedDrag);
+document.addEventListener('touchstart', startPlacedDrag, { passive: false });
+
+// --- move drag ---
+function moveDrag(e) {
+  if (!currentDrag) return;
+  e.preventDefault();
+  const pos = getEventPos(e);
+  currentDrag.style.left = `${e.pageX - 70}px`;
+  currentDrag.style.top = `${e.pageY - 70}px`;
+
+  if (currentDrag.numberLabel) {
+    currentDrag.numberLabel.style.left = (pos.x - 10) + 'px';
+    currentDrag.numberLabel.style.top = (pos.y + 60) + 'px';
+  }
+}
+
+document.addEventListener('mousemove', moveDrag);
+document.addEventListener('touchmove', moveDrag, { passive: false });
+
+// --- drop ---
+function endDrag() {
+  currentDrag = null;
+}
+
+document.addEventListener('mouseup', endDrag);
+document.addEventListener('touchend', endDrag);
+
+// --- reset faces ---
 function resetFaces() {
   document.querySelectorAll('.draggable-face').forEach(img => img.remove());
   document.querySelectorAll('.draggable-number').forEach(num => num.remove());
