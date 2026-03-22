@@ -76,10 +76,10 @@
   </style>
 </head>
 <body>
-<div id="game-canvas-container" style="position:fixed;inset:0;z-index:1;"></div>
+<div id="game-canvas-container" style="position:fixed;inset:0;z-index:1;background:#000;"></div>
 
 <div id="overlay">
-  <h1>RICCI</h1>
+  <h1>KUMAR ESCAPE</h1>
   <p>Collect all <strong style="color:#D4A017">5 curry bowls</strong> hidden in curry land.<br>Don't let <strong style="color:#c00">Devesh</strong> rape you.</p>
   <div class="controls">
     WASD / Arrow Keys — Move<br>
@@ -98,14 +98,14 @@
 
 <div id="win">
   <h1>YOU ESCAPED!</h1>
-  <p>You collected all the curry you fatty and escaped the curry land.<br>Here's your free clothes discount code:</p>
+  <p>You collected all the curry you fatty and escaped curry land.<br>Here's your free clothes discount code:</p>
   <div class="code-box">RICCI-FREE</div>
   <p style="font-size:0.8rem; color:#666">Here is your £1 voucher — enter at checkout.</p>
   <button onclick="window.location.href='index.html'">BACK TO SHOP</button>
 </div>
 
 <div id="hud" style="display:none">
-  <span id="item-count">CURRY: 0 / 5</span>
+  <span id="item-count">ITEMS: 0 / 5</span>
   <span id="status">👁 SAFE</span>
 </div>
 <div id="crosshair" style="display:none"></div>
@@ -184,6 +184,8 @@ const COLS = MAZE[0].length;
 function cellToWorld(row, col) {
   return new THREE.Vector3(col * CELL - (COLS * CELL) / 2, 0, row * CELL - (ROWS * CELL) / 2);
 }
+
+const isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent) || ('ontouchstart' in window && window.innerWidth < 900);
 
 // ── AUDIO SYSTEM ──────────────────────────────────────────
 const themeAudio = new Audio('scary-music.mp3');
@@ -265,10 +267,16 @@ function startGame() {
   document.getElementById('crosshair').style.display = 'block';
   document.getElementById('stamina-bar').style.display = 'block';
   initGame();
-  requestPointerLock();
+  // Only request pointer lock on desktop — mobile doesn't support it
+  if (!isMobile) requestPointerLock();
   gameActive = true;
-  animate();
-  playTheme();
+  // Small delay on mobile to let the renderer attach before animating
+  if (isMobile) {
+    setTimeout(() => { animate(); playTheme(); }, 100);
+  } else {
+    animate();
+    playTheme();
+  }
 }
 
 function restartGame() {
@@ -682,7 +690,6 @@ document.addEventListener('keydown', e => { keys[e.code] = true; });
 document.addEventListener('keyup',   e => { keys[e.code] = false; });
 
 // ── MOBILE CONTROLS (phone only) ─────────────────────────
-const isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent) || ('ontouchstart' in window && window.innerWidth < 900);
 
 if (isMobile) {
   // Inject mobile UI
