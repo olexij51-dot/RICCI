@@ -957,11 +957,22 @@ function movePlayer(delta) {
 }
 
 function updateMonster(delta) {
-  if (!monster) return;
+  if (!monster || gameEnded) return;
 
   monster.lookAt(camera.position.x, monster.position.y, camera.position.z);
 
   const dist = monster.position.distanceTo(camera.position);
+  
+  // Caught - check FIRST before any expensive operations
+  if (dist < 1.0) { 
+    if (!gameEnded) { 
+      gameEnded = true;
+      gameActive = false;
+      gameOver(); 
+    }
+    return;
+  }
+
   const monsterToPlayer = camera.position.clone().sub(monster.position).normalize();
 
   // Line of sight check
@@ -975,23 +986,23 @@ function updateMonster(delta) {
     monsterTarget.copy(camera.position);
     document.getElementById('status').textContent = '👁 DEVESH SEES YOU';
     document.getElementById('status').style.color = '#c00';
-    playChase();
+    if (currentMusic !== 'chase') playChase();
   } else if (dist < 4) {
     monsterState = 'chase';
     monsterTarget.copy(camera.position);
-    playChase();
+    if (currentMusic !== 'chase') playChase();
   } else if (monsterState === 'chase' && Date.now() - lastSeen > 3000) {
     monsterState = 'wander';
     document.getElementById('status').textContent = '👁 SAFE';
     document.getElementById('status').style.color = '#D4A017';
     pickNewWanderTarget();
-    playTheme();
+    if (currentMusic !== 'theme') playTheme();
   } else if (monsterState === 'idle') {
     monsterState = 'wander';
     pickNewWanderTarget();
   }
 
-  // Move monster
+  // Move monster - SKIP collision detection on mobile to prevent freeze
   const speed = monsterState === 'chase' ? 3.6 : 1.4;
   const dir = monsterTarget.clone().sub(monster.position);
   dir.y = 0;
@@ -999,43 +1010,46 @@ function updateMonster(delta) {
     dir.normalize();
     const move = dir.multiplyScalar(speed * delta);
     const newPos = monster.position.clone().add(move);
-    const mb = new THREE.Box3(
-      new THREE.Vector3(newPos.x-0.4,0,newPos.z-0.4),
-      new THREE.Vector3(newPos.x+0.4,3,newPos.z+0.4)
-    );
-    let blocked = false;
-    for (const wall of walls) { if (getWallBB(wall).intersectsBox(mb)) { blocked=true; break; } }
+    
+    if (!isMobile) {
+      // Collision detection (expensive) - only on desktop
+      const mb = new THREE.Box3(
+        new THREE.Vector3(newPos.x-0.4,0,newPos.z-0.4),
+        new THREE.Vector3(newPos.x+0.4,3,newPos.z+0.4)
+      );
+      let blocked = false;
+      for (const wall of walls) { if (getWallBB(wall).intersectsBox(mb)) { blocked=true; break; } }
 
-    if (!blocked) {
+      if (!blocked) {
+        monster.position.x = newPos.x;
+        monster.position.z = newPos.z;
+      } else {
+        // Try sliding along X only
+        const mx = monster.position.clone();
+        mx.x += move.x;
+        const bx = new THREE.Box3(new THREE.Vector3(mx.x-0.4,0,mx.z-0.4),new THREE.Vector3(mx.x+0.4,3,mx.z+0.4));
+        let xBlocked = false;
+        for (const wall of walls) { if (getWallBB(wall).intersectsBox(bx)) { xBlocked=true; break; } }
+        if (!xBlocked) { monster.position.x = mx.x; }
+
+        // Try sliding along Z only
+        const mz = monster.position.clone();
+        mz.z += move.z;
+        const bz = new THREE.Box3(new THREE.Vector3(mz.x-0.4,0,mz.z-0.4),new THREE.Vector3(mz.x+0.4,3,mz.z+0.4));
+        let zBlocked = false;
+        for (const wall of walls) { if (getWallBB(wall).intersectsBox(bz)) { zBlocked=true; break; } }
+        if (!zBlocked) { monster.position.z = mz.z; }
+
+        if (xBlocked && zBlocked) pickNewWanderTarget();
+      }
+    } else {
+      // On mobile, just move without collision to prevent freeze
       monster.position.x = newPos.x;
       monster.position.z = newPos.z;
-    } else {
-      // Try sliding along X only
-      const mx = monster.position.clone();
-      mx.x += move.x;
-      const bx = new THREE.Box3(new THREE.Vector3(mx.x-0.4,0,mx.z-0.4),new THREE.Vector3(mx.x+0.4,3,mx.z+0.4));
-      let xBlocked = false;
-      for (const wall of walls) { if (getWallBB(wall).intersectsBox(bx)) { xBlocked=true; break; } }
-      if (!xBlocked) { monster.position.x = mx.x; }
-
-      // Try sliding along Z only
-      const mz = monster.position.clone();
-      mz.z += move.z;
-      const bz = new THREE.Box3(new THREE.Vector3(mz.x-0.4,0,mz.z-0.4),new THREE.Vector3(mz.x+0.4,3,mz.z+0.4));
-      let zBlocked = false;
-      for (const wall of walls) { if (getWallBB(wall).intersectsBox(bz)) { zBlocked=true; break; } }
-      if (!zBlocked) { monster.position.z = mz.z; }
-
-      // If completely stuck, pick a new wander target
-      if (xBlocked && zBlocked) pickNewWanderTarget();
     }
   } else if (monsterState === 'wander') {
-    // Reached wander target — pick another
     pickNewWanderTarget();
   }
-
-  // Caught
-  if (dist < 1.0) { if (!gameEnded) gameOver(); }
 
   // Proximity flash
   if (dist < 6 && monsterState === 'chase') flashRed();
@@ -1043,11 +1057,11 @@ function updateMonster(delta) {
   // Footstep explosions + camera shake when chasing and close
   if (monsterState === 'chase' && dist < 10) {
     const now = Date.now();
-    const stepInterval = Math.max(300, dist * 80); // faster steps when closer
+    const stepInterval = Math.max(300, dist * 80);
     if (!window._lastFootstep) window._lastFootstep = 0;
     if (now - window._lastFootstep > stepInterval) {
       window._lastFootstep = now;
-      playFootstep(dist);
+      if (!isMobile) playFootstep(dist);
       triggerCameraShake(dist);
     }
   }
@@ -1121,31 +1135,49 @@ function checkCollectibles() {
 }
 
 function gameOver() {
-  if (gameEnded) return;
-  gameEnded = true;
+  // Immediately stop all game logic
   gameActive = false;
-  document.exitPointerLock();
-  const di = document.getElementById('devesh-img'); if (di) di.style.display='none';
+  
+  try { document.exitPointerLock(); } catch(e) {}
+  const di = document.getElementById('devesh-img'); 
+  if (di) di.style.display='none';
 
-  // Stop audio safely
+  // Stop all audio immediately
   try { clearInterval(fadeInterval); } catch(e){}
-  try { themeAudio.pause(); } catch(e){}
-  try { chaseAudio.pause(); } catch(e){}
+  try { themeAudio.pause(); themeAudio.currentTime = 0; } catch(e){}
+  try { chaseAudio.pause(); chaseAudio.currentTime = 0; } catch(e){}
 
+  // Hide HUD
+  document.getElementById('hud').style.display = 'none';
+  document.getElementById('crosshair').style.display = 'none';
+  document.getElementById('stamina-bar').style.display = 'none';
+
+  // On mobile, skip the jumpscare animation entirely and go straight to gameover
+  if (isMobile) {
+    document.getElementById('gameover').style.display = 'flex';
+    // Optional: Play a simple sound without audio context
+    try {
+      const beep = new Audio('my-tag.wav');
+      beep.volume = 0.3;
+      beep.play().catch(() => {});
+    } catch(e) {}
+    return;
+  }
+
+  // On desktop, show jumpscare with animation
   const js = document.getElementById('jumpscare');
   const jsImg = document.getElementById('jumpscare-img');
   js.style.display = 'flex';
   
-  // Add animation class only when showing (skip on mobile to prevent freezing)
-  if (jsImg && !isMobile) {
+  if (jsImg) {
     jsImg.classList.add('scareshake-animate');
   }
 
-  // Play jumpscare sound with better error handling
+  // Play jumpscare sound
   try {
     const tag = new Audio('my-tag.wav');
     tag.volume = 0.8;
-    tag.play().catch(() => {}).then(() => {});
+    tag.play().catch(() => {});
   } catch(e) {}
 
   setTimeout(() => {
@@ -1154,20 +1186,16 @@ function gameOver() {
     js.style.display = 'none';
     
     document.getElementById('gameover').style.display = 'flex';
-    document.getElementById('hud').style.display = 'none';
-    document.getElementById('crosshair').style.display = 'none';
-    document.getElementById('stamina-bar').style.display = 'none';
     
-    // Play background music with error handling
+    // Play background music
     try {
       const tuff = new Audio('tuff-kumar.mp3');
       tuff.volume = 0.7;
       tuff.loop = true;
-      tuff.play().catch(() => {}).then(() => {
-        window._tuffAudio = tuff;
-      });
+      tuff.play().catch(() => {});
+      window._tuffAudio = tuff;
     } catch(e) {}
-  }, isMobile ? 1000 : 2000);
+  }, 2000);
 }
 
 function showWin() {
