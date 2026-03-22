@@ -1219,17 +1219,37 @@ function gameOver() {
 }
 
 function showWin() {
+  if (gameEnded) return;
+  gameEnded = true;
   gameActive = false;
-  document.exitPointerLock();
+  try { document.exitPointerLock(); } catch(e) {}
   stopAllMusic();
   const di = document.getElementById('devesh-img'); if (di) di.style.display='none';
+
+  // Clear potential pending effect loops (same safety as gameOver)
+  const js = document.getElementById('jumpscare');
+  if (js) js.style.display = 'none';
+  const jsImg = document.getElementById('jumpscare-img');
+  if (jsImg) jsImg.classList.remove('scareshake-animate');
+
+  // Mobile safe path: no latency-heavy UI or sound
+  if (isMobile) {
+    document.getElementById('win').style.display = 'flex';
+    document.getElementById('hud').style.display = 'none';
+    document.getElementById('crosshair').style.display = 'none';
+    document.getElementById('stamina-bar').style.display = 'none';
+    return;
+  }
+
   document.getElementById('win').style.display = 'flex';
   document.getElementById('hud').style.display = 'none';
   document.getElementById('crosshair').style.display = 'none';
   document.getElementById('stamina-bar').style.display = 'none';
-  const winSong = new Audio('deversh-abaudna-phonk.mp3');
-  winSong.volume = 1.0;
-  winSong.play().catch(()=>{});
+  try {
+    const winSong = new Audio('deversh-abaudna-phonk.mp3');
+    winSong.volume = 1.0;
+    winSong.play().catch(()=>{});
+  } catch(e) {}
 }
 
 function playExplosionFootstep() {
