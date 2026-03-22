@@ -79,26 +79,26 @@
 <div id="game-canvas-container" style="position:fixed;inset:0;z-index:1;background:#000;"></div>
 
 <div id="overlay">
-  <h1>KUMAR ESCAPE</h1>
-  <p>Collect all <strong style="color:#D4A017">5 curry bowls</strong> hidden in curry land.<br>Don't let <strong style="color:#c00">Devesh</strong> rape you.</p>
+  <h1>RICCI</h1>
+  <p>Collect all <strong style="color:#D4A017">5 golden items</strong> hidden in the maze.<br>Don't let <strong style="color:#c00">Devesh</strong> catch you.</p>
   <div class="controls">
     WASD / Arrow Keys — Move<br>
     SHIFT — Sprint<br>
     Mouse — Look around<br>
     Click to lock mouse
   </div>
-  <button onclick="startGame()">ENTER THE CURRY LAND</button>
+  <button onclick="startGame()">ENTER THE MAZE</button>
 </div>
 
 <div id="gameover">
-  <h1>RAPED.</h1>
-  <p>Devesh raped you. Better luck next time.</p>
+  <h1>CAUGHT.</h1>
+  <p>Devesh got you. Better luck next time.</p>
   <button onclick="restartGame()">TRY AGAIN</button>
 </div>
 
 <div id="win">
   <h1>YOU ESCAPED!</h1>
-  <p>You collected all the curry you fatty and escaped curry land.<br>Here's your free clothes discount code:</p>
+  <p>You collected all items and escaped the maze.<br>Here's your free clothes discount code:</p>
   <div class="code-box">RICCI-FREE</div>
   <p style="font-size:0.8rem; color:#666">Here is your £1 voucher — enter at checkout.</p>
   <button onclick="window.location.href='index.html'">BACK TO SHOP</button>
@@ -784,8 +784,11 @@ if (isMobile) {
   // Sprint button
   let sprintOn = false;
   const sprintBtn = document.getElementById('sprint-btn');
-  sprintBtn.addEventListener('touchstart', e => { e.preventDefault(); sprintOn = true; sprintBtn.classList.add('active'); }, {passive:false});
-  sprintBtn.addEventListener('touchend',   e => { e.preventDefault(); sprintOn = false; sprintBtn.classList.remove('active'); }, {passive:false});
+  sprintBtn.addEventListener('touchstart', e => {
+    e.preventDefault();
+    sprintOn = !sprintOn;
+    sprintBtn.classList.toggle('active', sprintOn);
+  }, {passive:false});
 
   // Camera drag (right side)
   let camId = null, lastCamX = 0, lastCamY = 0;
@@ -1086,7 +1089,6 @@ function gameOver() {
 
   stopAllMusic();
 
-  // Jumpscare sound — instant loud
   const tag = new Audio('my-tag.wav');
   tag.volume = 1.0;
   tag.play().catch(()=>{});
@@ -1094,13 +1096,21 @@ function gameOver() {
   const js = document.getElementById('jumpscare');
   js.style.display = 'flex';
 
+  // Keep rendering during jumpscare so screen doesn't freeze
+  let jumpscareFrames = 0;
+  function jumpscareRender() {
+    jumpscareFrames++;
+    if (renderer && scene && camera) renderer.render(scene, camera);
+    if (jumpscareFrames < 120) requestAnimationFrame(jumpscareRender);
+  }
+  jumpscareRender();
+
   setTimeout(() => {
     js.style.display = 'none';
     document.getElementById('gameover').style.display = 'flex';
     document.getElementById('hud').style.display = 'none';
     document.getElementById('crosshair').style.display = 'none';
     document.getElementById('stamina-bar').style.display = 'none';
-    // Play tuff-kumar on the game over screen
     const tuff = new Audio('tuff-kumar.mp3');
     tuff.volume = 1.0;
     tuff.loop = true;
