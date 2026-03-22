@@ -79,26 +79,26 @@
 <div id="game-canvas-container" style="position:fixed;inset:0;z-index:1;background:#000;"></div>
 
 <div id="overlay">
-  <h1>RICCI</h1>
-  <p>Collect all <strong style="color:#D4A017">5 golden items</strong> hidden in the maze.<br>Don't let <strong style="color:#c00">Devesh</strong> catch you.</p>
+  <h1>KUMAR ESCAPE</h1>
+  <p>Collect all <strong style="color:#D4A017">5 curry bowls</strong> hidden in curry land.<br>Don't let <strong style="color:#c00">Devesh</strong> rape you.</p>
   <div class="controls">
     WASD / Arrow Keys — Move<br>
     SHIFT — Sprint<br>
     Mouse — Look around<br>
     Click to lock mouse
   </div>
-  <button onclick="startGame()">ENTER THE MAZE</button>
+  <button onclick="startGame()">ENTER THE CURRY LAND</button>
 </div>
 
 <div id="gameover">
-  <h1>CAUGHT.</h1>
-  <p>Devesh got you. Better luck next time.</p>
+  <h1>RAPED.</h1>
+  <p>Devesh raped you. Better luck next time.</p>
   <button onclick="restartGame()">TRY AGAIN</button>
 </div>
 
 <div id="win">
   <h1>YOU ESCAPED!</h1>
-  <p>You collected all items and escaped the maze.<br>Here's your free clothes discount code:</p>
+  <p>You collected all the curry and escaped the curry land.<br>Here's your free clothes discount code:</p>
   <div class="code-box">RICCI-FREE</div>
   <p style="font-size:0.8rem; color:#666">Here is your £1 voucher — enter at checkout.</p>
   <button onclick="window.location.href='index.html'">BACK TO SHOP</button>
@@ -115,19 +115,21 @@
   position:fixed; inset:0; z-index:300; display:none;
   background:#000; align-items:center; justify-content:center; flex-direction:column;
 ">
-  <img src="devesh-bouncing-face.jpg" style="
+  <img id="jumpscare-img" src="devesh-bouncing-face.jpg" style="
     width: min(90vw, 600px); height: auto;
-    animation: scareshake 0.15s infinite;
   "/>
 </div>
 
 <style>
 @keyframes scareshake {
-  0%   { transform: scaleX(2.8) translate(-4px,-4px) scale(1.05); }
-  25%  { transform: scaleX(2.8) translate(4px, 4px) scale(1.08); }
-  50%  { transform: scaleX(2.8) translate(-4px, 4px) scale(1.05); }
-  75%  { transform: scaleX(2.8) translate(4px,-4px) scale(1.08); }
-  100% { transform: scaleX(2.8) translate(-4px,-4px) scale(1.05); }
+  0%   { transform: scaleX(2.8) translateX(-2px); will-change: transform; }
+  25%  { transform: scaleX(2.8) translateX(2px); }
+  50%  { transform: scaleX(2.8) translateX(-2px); }
+  75%  { transform: scaleX(2.8) translateX(2px); }
+  100% { transform: scaleX(2.8) translateX(-2px); }
+}
+.scareshake-animate {
+  animation: scareshake 0.15s infinite;
 }
 </style>
 
@@ -244,9 +246,9 @@ function playTheme() {
   if (currentMusic === 'theme') return;
   currentMusic = 'theme';
   if (!chaseAudio.paused) {
-    fadeOut(chaseAudio, 1500, () => fadeIn(themeAudio, 0.6, 1500));
+    fadeOut(chaseAudio, isMobile ? 800 : 1500, () => fadeIn(themeAudio, 0.4, isMobile ? 800 : 1500));
   } else {
-    fadeIn(themeAudio, 0.6, 1500);
+    fadeIn(themeAudio, 0.4, isMobile ? 800 : 1500);
   }
 }
 
@@ -254,12 +256,48 @@ function playChase() {
   if (currentMusic === 'chase') return;
   currentMusic = 'chase';
   if (!themeAudio.paused) {
-    fadeOut(themeAudio, 800, () => fadeIn(chaseAudio, 0.85, 800));
+    fadeOut(themeAudio, isMobile ? 500 : 800, () => fadeIn(chaseAudio, 0.6, isMobile ? 500 : 800));
   } else {
-    fadeIn(chaseAudio, 0.85, 800);
+    fadeIn(chaseAudio, 0.6, isMobile ? 500 : 800);
   }
 }
 // ──────────────────────────────────────────────────────────
+
+function initGame() {
+  // Initialize renderer with mobile optimization
+  renderer = new THREE.WebGLRenderer({ antialias: false });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.shadowMap.enabled = false;
+  // Reduce pixel ratio on mobile for better performance
+  renderer.setPixelRatio(isMobile ? 0.5 : 0.8);
+  document.getElementById('game-canvas-container').appendChild(renderer.domElement);
+
+  // Initialize scene
+  scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x050505);
+  scene.fog = new THREE.Fog(0x050505, 4, 20);
+
+  // Initialize clock
+  clock = new THREE.Clock();
+
+  // Initialize camera
+  camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100);
+  camera.position.y = 1.6;
+
+  // Build the game world
+  buildScene();
+  spawnPlayer();
+  spawnMonster();
+  spawnItems();
+  addLighting();
+
+  // Handle window resize
+  window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  });
+}
 
 function startGame() {
   const ol = document.getElementById('overlay');
@@ -267,6 +305,15 @@ function startGame() {
   document.getElementById('hud').style.display = 'flex';
   document.getElementById('crosshair').style.display = 'block';
   document.getElementById('stamina-bar').style.display = 'block';
+  
+  // Clean up any previous audio
+  try { 
+    if (window._tuffAudio) { 
+      window._tuffAudio.pause(); 
+      window._tuffAudio = null; 
+    } 
+  } catch(e) {}
+  
   initGame();
   if (!isMobile) requestPointerLock();
   gameActive = true;
@@ -1085,30 +1132,42 @@ function gameOver() {
   try { themeAudio.pause(); } catch(e){}
   try { chaseAudio.pause(); } catch(e){}
 
-  // Play jumpscare sound
+  const js = document.getElementById('jumpscare');
+  const jsImg = document.getElementById('jumpscare-img');
+  js.style.display = 'flex';
+  
+  // Add animation class only when showing (skip on mobile to prevent freezing)
+  if (jsImg && !isMobile) {
+    jsImg.classList.add('scareshake-animate');
+  }
+
+  // Play jumpscare sound with better error handling
   try {
     const tag = new Audio('my-tag.wav');
-    tag.volume = 1.0;
-    tag.play().catch(()=>{});
-  } catch(e){}
-
-  const js = document.getElementById('jumpscare');
-  js.style.display = 'flex';
+    tag.volume = 0.8;
+    tag.play().catch(() => {}).then(() => {});
+  } catch(e) {}
 
   setTimeout(() => {
+    // Stop animation
+    if (jsImg) jsImg.classList.remove('scareshake-animate');
     js.style.display = 'none';
+    
     document.getElementById('gameover').style.display = 'flex';
     document.getElementById('hud').style.display = 'none';
     document.getElementById('crosshair').style.display = 'none';
     document.getElementById('stamina-bar').style.display = 'none';
+    
+    // Play background music with error handling
     try {
       const tuff = new Audio('tuff-kumar.mp3');
-      tuff.volume = 1.0;
+      tuff.volume = 0.7;
       tuff.loop = true;
-      tuff.play().catch(()=>{});
-      window._tuffAudio = tuff;
-    } catch(e){}
-  }, 2000);
+      tuff.play().catch(() => {}).then(() => {
+        window._tuffAudio = tuff;
+      });
+    } catch(e) {}
+  }, isMobile ? 1000 : 2000);
 }
 
 function showWin() {
@@ -1126,6 +1185,9 @@ function showWin() {
 }
 
 function playExplosionFootstep() {
+  // Skip on mobile to prevent audio context overload
+  if (isMobile) return;
+  
   try {
     const ctx = new (window.AudioContext || window.webkitAudioContext)();
     // Deep boom
@@ -1155,8 +1217,8 @@ function animate() {
   updateMonster(delta);
   checkCollectibles();
 
-  // Footsteps + camera shake when Devesh is close
-  if (monster) {
+  // Footsteps + camera shake when Devesh is close (skip on mobile to reduce load)
+  if (monster && !isMobile) {
     const distToDevesh = monster.position.distanceTo(camera.position);
     if (distToDevesh < 10 && monsterState === 'chase') {
       // Footstep every ~0.5s, faster when closer
