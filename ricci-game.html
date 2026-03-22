@@ -143,6 +143,7 @@ let isLocked = false;
 let itemsCollected = 0;
 let stamina = 100;
 let gameActive = false;
+let gameEnded = false;
 let monsterState = 'idle'; // idle, chase, search
 let monsterTarget = new THREE.Vector3();
 let lastSeen = 0;
@@ -294,11 +295,8 @@ function restartGame() {
   spawnItems();
   addLighting();
   document.getElementById('item-count').textContent = 'ITEMS: 0 / 5';
+  gameEnded = false;
   gameActive = true;
-  playTheme();
-}
-
-function initGame() {
   renderer = new THREE.WebGLRenderer({ antialias: false });
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.shadowMap.enabled = false;
@@ -997,7 +995,7 @@ function updateMonster(delta) {
   }
 
   // Caught
-  if (dist < 1.0) gameOver();
+  if (dist < 1.0) { if (!gameEnded) gameOver(); }
 
   // Proximity flash
   if (dist < 6 && monsterState === 'chase') flashRed();
@@ -1083,15 +1081,23 @@ function checkCollectibles() {
 }
 
 function gameOver() {
+  if (gameEnded) return;
+  gameEnded = true;
   gameActive = false;
   document.exitPointerLock();
   const di = document.getElementById('devesh-img'); if (di) di.style.display='none';
 
-  stopAllMusic();
+  // Stop audio safely
+  try { clearInterval(fadeInterval); } catch(e){}
+  try { themeAudio.pause(); } catch(e){}
+  try { chaseAudio.pause(); } catch(e){}
 
-  const tag = new Audio('my-tag.wav');
-  tag.volume = 1.0;
-  tag.play().catch(()=>{});
+  // Play jumpscare sound
+  try {
+    const tag = new Audio('my-tag.wav');
+    tag.volume = 1.0;
+    tag.play().catch(()=>{});
+  } catch(e){}
 
   const js = document.getElementById('jumpscare');
   js.style.display = 'flex';
@@ -1102,11 +1108,13 @@ function gameOver() {
     document.getElementById('hud').style.display = 'none';
     document.getElementById('crosshair').style.display = 'none';
     document.getElementById('stamina-bar').style.display = 'none';
-    const tuff = new Audio('tuff-kumar.mp3');
-    tuff.volume = 1.0;
-    tuff.loop = true;
-    tuff.play().catch(()=>{});
-    window._tuffAudio = tuff;
+    try {
+      const tuff = new Audio('tuff-kumar.mp3');
+      tuff.volume = 1.0;
+      tuff.loop = true;
+      tuff.play().catch(()=>{});
+      window._tuffAudio = tuff;
+    } catch(e){}
   }, 2000);
 }
 
