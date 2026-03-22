@@ -268,16 +268,9 @@ function startGame() {
   document.getElementById('crosshair').style.display = 'block';
   document.getElementById('stamina-bar').style.display = 'block';
   initGame();
-  // Only request pointer lock on desktop — mobile doesn't support it
   if (!isMobile) requestPointerLock();
   gameActive = true;
-  // Small delay on mobile to let the renderer attach before animating
-  if (isMobile) {
-    setTimeout(() => { animate(); playTheme(); }, 100);
-  } else {
-    animate();
-    playTheme();
-  }
+  playTheme();
 }
 
 function restartGame() {
@@ -1154,7 +1147,8 @@ function playExplosionFootstep() {
 
 function animate() {
   requestAnimationFrame(animate);
-  if (renderer && scene && camera) renderer.render(scene, camera);
+  if (!renderer || !scene || !camera) return;
+  renderer.render(scene, camera);
   if (!gameActive) return;
   const delta = Math.min(clock.getDelta(), 0.05);
   movePlayer(delta);
@@ -1236,6 +1230,9 @@ function animate() {
   }
 
 }
+
+// Start the render loop once — it always runs, game logic only runs when gameActive
+animate();
 </script>
 </body>
 </html>
