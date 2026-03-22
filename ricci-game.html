@@ -299,21 +299,67 @@ function initGame() {
   });
 }
 
+function cleanupGame() {
+  gameActive = false;
+  gameEnded = true;
+
+  try { document.exitPointerLock(); } catch(e) {}
+
+  // Remove devesh overlay
+  const oldDevesh = document.getElementById('devesh-img');
+  if (oldDevesh) oldDevesh.remove();
+
+  // Remove jumpscare overlay
+  const oldJumpscare = document.getElementById('jumpscare');
+  if (oldJumpscare) {
+    oldJumpscare.style.display = 'none';
+    const img = document.getElementById('jumpscare-img');
+    if (img) img.classList.remove('scareshake-animate');
+  }
+
+  // Stop all audio
+  stopAllMusic();
+  if (window._tuffAudio) { try { window._tuffAudio.pause(); } catch(e) {} window._tuffAudio = null; }
+
+  if (renderer) {
+    try { renderer.dispose(); } catch(e) {}
+    if (renderer.domElement && renderer.domElement.parentNode) {
+      renderer.domElement.parentNode.removeChild(renderer.domElement);
+    }
+  }
+
+  if (scene) {
+    while (scene.children.length > 0) {
+      const child = scene.children[0];
+      if (child.geometry) child.geometry.dispose();
+      if (child.material) {
+        if (Array.isArray(child.material)) child.material.forEach(m => m.dispose && m.dispose());
+        else child.material.dispose && child.material.dispose();
+      }
+      scene.remove(child);
+    }
+  }
+
+  walls = [];
+  items = [];
+  collectibles = [];
+}
+
 function startGame() {
   const ol = document.getElementById('overlay');
   ol.style.display = 'none';
   document.getElementById('hud').style.display = 'flex';
   document.getElementById('crosshair').style.display = 'block';
   document.getElementById('stamina-bar').style.display = 'block';
-  
-  // Clean up any previous audio
-  try { 
-    if (window._tuffAudio) { 
-      window._tuffAudio.pause(); 
-      window._tuffAudio = null; 
-    } 
-  } catch(e) {}
-  
+
+  cleanupGame();
+
+  itemsCollected = 0;
+  stamina = 100;
+  monsterState = 'idle';
+  yaw = 0; pitch = 0;
+  gameEnded = false;
+
   initGame();
   if (!isMobile) requestPointerLock();
   gameActive = true;
@@ -321,48 +367,22 @@ function startGame() {
 }
 
 function restartGame() {
-  if (window._tuffAudio) { window._tuffAudio.pause(); window._tuffAudio = null; }
+  cleanupGame();
   document.getElementById('gameover').style.display = 'none';
+  document.getElementById('item-count').textContent = 'ITEMS: 0 / 5';
+  document.getElementById('hud').style.display = 'flex';
+  document.getElementById('crosshair').style.display = 'block';
+  document.getElementById('stamina-bar').style.display = 'block';
+
   itemsCollected = 0;
   stamina = 100;
   monsterState = 'idle';
   yaw = 0; pitch = 0;
-  while(scene.children.length > 0) scene.remove(scene.children[0]);
-  walls = []; items = []; collectibles = [];
-  buildScene();
-  spawnPlayer();
-  spawnMonster();
-  spawnItems();
-  addLighting();
-  document.getElementById('item-count').textContent = 'ITEMS: 0 / 5';
   gameEnded = false;
+
+  initGame();
   gameActive = true;
-  renderer = new THREE.WebGLRenderer({ antialias: false });
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  renderer.shadowMap.enabled = false;
-  renderer.setPixelRatio(0.8);
-  document.getElementById('game-canvas-container').appendChild(renderer.domElement);
-
-  scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x050505);
-  scene.fog = new THREE.Fog(0x050505, 4, 20);
-
-  clock = new THREE.Clock();
-
-  camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100);
-  camera.position.y = 1.6;
-
-  buildScene();
-  spawnPlayer();
-  spawnMonster();
-  spawnItems();
-  addLighting();
-
-  window.addEventListener('resize', () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-  });
+  playTheme();
 }
 
 const WALL_IMGS = {
