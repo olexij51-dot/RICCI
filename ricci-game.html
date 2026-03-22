@@ -1096,15 +1096,6 @@ function gameOver() {
   const js = document.getElementById('jumpscare');
   js.style.display = 'flex';
 
-  // Keep rendering during jumpscare so screen doesn't freeze
-  let jumpscareFrames = 0;
-  function jumpscareRender() {
-    jumpscareFrames++;
-    if (renderer && scene && camera) renderer.render(scene, camera);
-    if (jumpscareFrames < 120) requestAnimationFrame(jumpscareRender);
-  }
-  jumpscareRender();
-
   setTimeout(() => {
     js.style.display = 'none';
     document.getElementById('gameover').style.display = 'flex';
@@ -1155,6 +1146,7 @@ function playExplosionFootstep() {
 
 function animate() {
   requestAnimationFrame(animate);
+  if (renderer && scene && camera) renderer.render(scene, camera);
   if (!gameActive) return;
   const delta = Math.min(clock.getDelta(), 0.05);
   movePlayer(delta);
