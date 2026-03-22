@@ -1322,12 +1322,13 @@ function animate() {
     const wallsBetween = wallCheck.intersectObjects(walls);
     const blockedByWall = wallsBetween.length > 0;
 
-    if (pos.z < 1 && !blockedByWall) {
+    const maxVisibleDist = isMobile ? 20 : 10;
+    if (pos.z < 1 && !blockedByWall && dist < maxVisibleDist) {
       const screenX = (pos.x * 0.5 + 0.5) * window.innerWidth;
       const screenY = (-pos.y * 0.5 + 0.5) * window.innerHeight;
-      const size = Math.min(600, Math.max(40, 800 / dist));
-      // Fade in: invisible beyond 10 units, fully visible at 4 units
-      const opacity = Math.min(1, Math.max(0, (10 - dist) / 6));
+      const size = Math.min(600, Math.max(40, (isMobile ? 1000 : 800) / Math.max(dist, 1)));
+      const fadeRange = isMobile ? 12 : 6;
+      const opacity = Math.min(1, Math.max(0, (maxVisibleDist - dist) / fadeRange));
       deveshImg.style.display = 'block';
       deveshImg.style.opacity = opacity;
       deveshImg.style.left = screenX + 'px';
