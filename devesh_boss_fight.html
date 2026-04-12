@@ -1,0 +1,1093 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Devesh Boss Fight</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:#000;overflow:hidden;font-family:monospace;}
+#c{display:block;width:100vw;height:100vh;}
+
+/* HUD */
+#hud{position:fixed;top:0;left:0;width:100%;pointer-events:none;z-index:10;}
+#top-hud{display:flex;justify-content:space-between;align-items:flex-start;padding:14px 18px;gap:12px;}
+.bar-wrap{background:rgba(0,0,0,0.75);border:1px solid rgba(255,255,255,0.22);border-radius:7px;padding:8px 12px;min-width:220px;}
+.bar-label{font-size:11px;color:#aaa;margin-bottom:5px;letter-spacing:1px;text-transform:uppercase;}
+.bar-bg{background:rgba(255,255,255,0.1);border-radius:4px;height:18px;overflow:visible;position:relative;}
+.bar-fill{height:100%;border-radius:4px;transition:width 0.1s;}
+#player-fill{background:linear-gradient(90deg,#2ecc71,#27ae60);}
+#boss-fill{background:linear-gradient(90deg,#e74c3c,#c0392b);}
+.bar-val{font-size:11px;color:#aaa;margin-top:4px;}
+.marker{position:absolute;top:-5px;width:2px;height:28px;background:rgba(255,255,255,0.75);z-index:2;pointer-events:none;}
+.marker-label{position:absolute;top:-17px;font-size:9px;color:#fff;transform:translateX(-50%);white-space:nowrap;background:rgba(0,0,0,0.65);padding:1px 4px;border-radius:3px;}
+.player-marker{position:absolute;top:-5px;width:2px;height:28px;background:rgba(255,215,0,0.85);z-index:2;}
+.player-marker-label{position:absolute;top:-17px;font-size:9px;color:#ffd700;transform:translateX(-50%);white-space:nowrap;background:rgba(0,0,0,0.65);padding:1px 4px;border-radius:3px;}
+#phase-badge{background:rgba(0,0,0,0.75);border:1px solid rgba(255,255,255,0.2);border-radius:6px;padding:7px 16px;font-size:12px;color:#fff;text-align:center;align-self:center;white-space:nowrap;letter-spacing:1px;}
+
+/* Weapon HUD */
+#weapon-hud{position:fixed;bottom:18px;right:18px;background:rgba(0,0,0,0.7);border:1px solid rgba(255,255,255,0.2);border-radius:8px;padding:10px 16px;color:#aaa;font-size:13px;pointer-events:none;line-height:1.8;}
+#weapon-hud .active{color:#f1c40f;font-weight:bold;}
+
+/* Crosshair */
+#crosshair{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:22px;height:22px;pointer-events:none;}
+#crosshair:before,#crosshair:after{content:'';position:absolute;background:rgba(255,255,255,0.85);}
+#crosshair:before{width:2px;height:100%;left:10px;}
+#crosshair:after{width:100%;height:2px;top:10px;}
+
+/* Messages */
+#msg{position:fixed;top:44%;left:50%;transform:translate(-50%,-50%);font-size:22px;color:#fff;text-align:center;background:rgba(0,0,0,0.8);padding:16px 30px;border-radius:8px;display:none;pointer-events:none;white-space:pre-line;line-height:1.5;}
+
+/* Start screen */
+#start-screen{position:fixed;inset:0;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;z-index:100;}
+#start-screen h1{font-size:48px;color:#e74c3c;margin-bottom:12px;letter-spacing:3px;text-shadow:0 0 30px rgba(231,76,60,0.5);}
+#start-screen .subtitle{color:#e74c3c;font-size:13px;margin-bottom:24px;letter-spacing:2px;}
+#start-screen p{color:#888;margin-bottom:5px;font-size:13px;}
+#start-screen .keys{margin:14px 0 6px;color:#ccc;font-size:13px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);padding:12px 24px;border-radius:6px;line-height:2;}
+#start-btn{margin-top:22px;background:#e74c3c;color:#fff;border:none;padding:14px 40px;font-size:16px;border-radius:6px;cursor:pointer;font-family:monospace;letter-spacing:2px;}
+#start-btn:hover{background:#c0392b;}
+
+/* Damage flash */
+#dmg-flash{position:fixed;inset:0;background:rgba(255,0,0,0);pointer-events:none;z-index:8;transition:background 0.08s;}
+</style>
+</head>
+<body>
+
+<div id="start-screen">
+  <h1>DEVESH BOSS FIGHT</h1>
+  <div class="subtitle">— 4 PHASES OF PAIN —</div>
+  <div class="keys">
+    WASD — Move &nbsp;|&nbsp; Mouse — Aim &nbsp;|&nbsp; Click — Shoot<br>
+    Q — AS VAL &nbsp;|&nbsp; E — Molotov (unlocks at 500 HP)
+  </div>
+  <p style="color:#666;font-size:12px;">Click the button then move your mouse to aim</p>
+  <button id="start-btn" onclick="startGame()">▶ FIGHT DEVESH</button>
+</div>
+
+<div id="hud">
+  <div id="top-hud">
+    <!-- Player HP -->
+    <div class="bar-wrap">
+      <div class="bar-label">Player HP</div>
+      <div class="bar-bg">
+        <div class="bar-fill" id="player-fill" style="width:100%"></div>
+      </div>
+      <div class="bar-val" id="player-hp-text">1000 / 1000</div>
+    </div>
+
+    <!-- Boss HP -->
+    <div class="bar-wrap">
+      <div class="bar-label">Devesh HP</div>
+      <div class="bar-bg">
+        <div class="bar-fill" id="boss-fill" style="width:100%"></div>
+        <div class="marker" style="left:75%;"></div>
+        <div class="marker" style="left:50%;"></div>
+        <div class="marker" style="left:25%;"></div>
+      </div>
+      <div class="bar-val" id="boss-hp-text">8000 / 8000</div>
+    </div>
+  </div>
+</div>
+
+<div id="crosshair"></div>
+<div id="msg"></div>
+<div id="dmg-flash"></div>
+<canvas id="c"></canvas>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+const renderer = new THREE.WebGLRenderer({canvas:document.getElementById('c'),antialias:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.shadowMap.enabled = true;
+renderer.setSize(innerWidth,innerHeight);
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0xd8d8d8);
+scene.fog = new THREE.Fog(0xd8d8d8,10,300);
+
+const camera = new THREE.PerspectiveCamera(75,innerWidth/innerHeight,0.1,1000);
+camera.position.set(0,1.7,0);
+
+// Initialize game state early
+let gameState='start', playerHP=1000, bossHP=8000;
+const bossMax=8000;
+let phase=1, playerWeapon='asval', molotovCount=3, molotovCooldown=0, molotovUnlocked=false, shootCooldown=0;
+let deveshAngle=0, deveshWalkCycle=0, deveshTargetAngle=0;
+let bossTimer1=0, bossTimer2=0, tsarTimer=0, pistolTimer=0, akTimer=0;
+let yaw=0, pitch=0, locked=false;
+const keys={};
+
+// Lights
+scene.add(new THREE.AmbientLight(0xffffff,0.25));
+scene.add(new THREE.HemisphereLight(0xebebeb,0x8a8a8a,0.5));
+const sun = new THREE.DirectionalLight(0xffffff,0.8);
+sun.position.set(8,20,8); sun.castShadow=true; scene.add(sun);
+const pt = new THREE.PointLight(0xffffff,0.35,50);
+pt.position.set(0,10,0); scene.add(pt);
+
+const arenaR = 40;
+
+// Floor
+const floor = new THREE.Mesh(new THREE.CircleGeometry(arenaR,64),new THREE.MeshLambertMaterial({color:0xd4d4d4}));
+floor.rotation.x=-Math.PI/2; floor.receiveShadow=true; scene.add(floor);
+for(let r=6;r<arenaR;r+=8){
+  const ring=new THREE.Mesh(new THREE.RingGeometry(r-0.07,r+0.07,64),new THREE.MeshLambertMaterial({color:0xb8b8b8}));
+  ring.rotation.x=-Math.PI/2; ring.position.y=0.01; scene.add(ring);
+}
+
+// Wall
+const wall=new THREE.Mesh(new THREE.CylinderGeometry(arenaR,arenaR,20,64,1,true),new THREE.MeshLambertMaterial({color:0xb8b8b8,side:THREE.BackSide}));
+wall.position.y=10; scene.add(wall);
+const wallTop=new THREE.Mesh(new THREE.TorusGeometry(arenaR,0.55,8,64),new THREE.MeshLambertMaterial({color:0xdadada}));
+wallTop.rotation.x=Math.PI/2; wallTop.position.y=20; scene.add(wallTop);
+
+// Torches
+for(let i=0;i<8;i++){
+  const a=(i/8)*Math.PI*2;
+  const torch=new THREE.Group();
+  torch.add(Object.assign(new THREE.Mesh(new THREE.CylinderGeometry(0.08,0.08,1,6),new THREE.MeshLambertMaterial({color:0x5a3010}))));
+  const flame=new THREE.Mesh(new THREE.ConeGeometry(0.15,0.35,6),new THREE.MeshLambertMaterial({color:0xcccccc}));
+  flame.position.y=0.7; torch.add(flame);
+  torch.position.set(Math.cos(a)*(arenaR-1),5,Math.sin(a)*(arenaR-1));
+  scene.add(torch);
+  const tl=new THREE.PointLight(0xffffff,0.25,12);
+  tl.position.copy(torch.position); tl.position.y+=0.8; scene.add(tl);
+}
+
+// Devesh face texture
+function makeDeveshFaceTexture(){
+  const cv=document.createElement('canvas'); cv.width=256; cv.height=256;
+  const ctx=cv.getContext('2d');
+  ctx.fillStyle='#C8864A'; ctx.fillRect(0,0,256,256);
+  ctx.fillStyle='#b87840';
+  ctx.beginPath(); ctx.ellipse(128,135,105,115,0,0,Math.PI*2); ctx.fill();
+  // Eyes
+  ctx.fillStyle='#fff';
+  ctx.beginPath(); ctx.ellipse(90,108,16,11,0,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(166,108,16,11,0,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle='#2a1a0a';
+  ctx.beginPath(); ctx.ellipse(92,109,10,8,0,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(168,109,10,8,0,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle='#000';
+  ctx.beginPath(); ctx.ellipse(93,109,6,6,0,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(169,109,6,6,0,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle='#fff';
+  ctx.beginPath(); ctx.ellipse(96,106,3,3,0,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(172,106,3,3,0,0,Math.PI*2); ctx.fill();
+  // Eyebrows
+  ctx.strokeStyle='#1a0800'; ctx.lineWidth=6; ctx.lineCap='round';
+  ctx.beginPath(); ctx.moveTo(70,90); ctx.lineTo(112,85); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(144,85); ctx.lineTo(186,90); ctx.stroke();
+  // Nose
+  ctx.strokeStyle='#8a5025'; ctx.lineWidth=3;
+  ctx.beginPath(); ctx.moveTo(128,118); ctx.lineTo(118,150); ctx.lineTo(138,150); ctx.stroke();
+  // Mouth smirk
+  ctx.strokeStyle='#6a2810'; ctx.lineWidth=4; ctx.lineCap='round';
+  ctx.beginPath(); ctx.moveTo(98,172); ctx.quadraticCurveTo(128,188,162,170); ctx.stroke();
+  // Hair
+  ctx.fillStyle='#080400';
+  ctx.beginPath(); ctx.ellipse(128,22,108,30,0,0,Math.PI*2); ctx.fill();
+  ctx.fillRect(16,10,224,30);
+  ctx.beginPath(); ctx.ellipse(20,60,18,55,0,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(236,60,18,55,0,0,Math.PI*2); ctx.fill();
+  return new THREE.CanvasTexture(cv);
+}
+
+function buildDevesh(){
+  const g=new THREE.Group();
+  const brown=0x7B4C20, darkBrown=0x4F2E14;
+  const skinMat=new THREE.MeshLambertMaterial({color:0xDFAF7A});
+  const bodyMat=new THREE.MeshLambertMaterial({color:brown});
+  const legMat=new THREE.MeshLambertMaterial({color:darkBrown});
+  const loader = new THREE.TextureLoader();
+  const faceTex = loader.load('devesh-bouncing-face.jpg');
+  const headMats=[
+    new THREE.MeshLambertMaterial({color:0xC8864A}), // right
+    new THREE.MeshLambertMaterial({color:0xC8864A}), // left
+    new THREE.MeshLambertMaterial({color:0x080400}), // top (hair)
+    new THREE.MeshLambertMaterial({color:0xC8864A}), // bottom
+    new THREE.MeshBasicMaterial({map:faceTex}),   // front (face)
+    new THREE.MeshLambertMaterial({color:0xC8864A}), // back
+  ];
+  const body=new THREE.Mesh(new THREE.CylinderGeometry(0.72,0.62,2.3,12),bodyMat);
+  body.position.y=2.5; body.castShadow=true; g.add(body);
+  const head=new THREE.Mesh(new THREE.BoxGeometry(1.5,1.5,1.5),headMats);
+  head.position.y=4.55; head.castShadow=true; g.add(head);
+  const neck=new THREE.Mesh(new THREE.CylinderGeometry(0.25,0.25,0.45,8),skinMat);
+  neck.position.y=3.65; g.add(neck);
+  const armGeo=new THREE.CylinderGeometry(0.19,0.15,2.1,8);
+  const armL=new THREE.Mesh(armGeo,bodyMat); armL.position.set(-0.95,2.65,0); armL.rotation.z=-0.38; armL.castShadow=true;
+  const armR=new THREE.Mesh(armGeo,bodyMat); armR.position.set(0.95,2.65,0); armR.rotation.z=0.38; armR.castShadow=true;
+  g.add(armL,armR);
+  const legGeo=new THREE.CylinderGeometry(0.24,0.19,2.5,8);
+  const legL=new THREE.Mesh(legGeo,legMat); legL.position.set(-0.38,0.15,0); legL.castShadow=true;
+  const legR=new THREE.Mesh(legGeo,legMat); legR.position.set(0.38,0.15,0); legR.castShadow=true;
+  g.add(legL,legR);
+  const footGeo=new THREE.BoxGeometry(0.38,0.18,0.6);
+  const footMat=new THREE.MeshLambertMaterial({color:0x111111});
+  const footL=new THREE.Mesh(footGeo,footMat); footL.position.set(-0.38,-1.08,0.14);
+  const footR=new THREE.Mesh(footGeo,footMat); footR.position.set(0.38,-1.08,0.14);
+  g.add(footL,footR);
+  const handL = new THREE.Group(); handL.position.set(-0.95,2.65,0);
+  const ak = buildAK47(); ak.scale.set(1.4,1.4,1.4); ak.position.set(0.15,0.17,0); ak.rotation.set(0, -Math.PI/2, -0.1); ak.visible = false; handL.add(ak);
+  g.add(handL);
+  const handR = new THREE.Group(); handR.position.set(0.95,2.65,0);
+  const pistol = buildPistol(); pistol.scale.set(1.6,1.6,1.6); pistol.position.set(0.1,0.2,0); pistol.rotation.set(0, -Math.PI/2, 0.1); handR.add(pistol);
+  g.add(handR);
+  g.userData={legL,legR,armL,armR,handL,handR,head};
+  return g;
+}
+
+function buildPistol(){
+  const g=new THREE.Group();
+  const mat=new THREE.MeshLambertMaterial({color:0x1a1a1a});
+  const slide=new THREE.Mesh(new THREE.BoxGeometry(0.55,0.18,0.13),mat); g.add(slide);
+  const barrel=new THREE.Mesh(new THREE.CylinderGeometry(0.04,0.04,0.08,8),mat);
+  barrel.rotation.z=Math.PI/2; barrel.position.x=0.31; g.add(barrel);
+  const grip=new THREE.Mesh(new THREE.BoxGeometry(0.18,0.3,0.12),new THREE.MeshLambertMaterial({color:0x222222}));
+  grip.position.set(-0.1,-0.2,0); g.add(grip);
+  const tg=new THREE.Mesh(new THREE.TorusGeometry(0.07,0.018,6,10,Math.PI),mat);
+  tg.rotation.z=-Math.PI/2; tg.position.set(0.08,-0.12,0); g.add(tg);
+  const sight=new THREE.Mesh(new THREE.BoxGeometry(0.06,0.06,0.06),mat);
+  sight.position.set(0.18,0.11,0); g.add(sight);
+  return g;
+}
+
+function buildAK47(){
+  const g=new THREE.Group();
+  const metalMat=new THREE.MeshLambertMaterial({color:0x222222});
+  const woodMat=new THREE.MeshLambertMaterial({color:0x7B3F1A});
+  const darkWoodMat=new THREE.MeshLambertMaterial({color:0x5C2E0A});
+  g.add(Object.assign(new THREE.Mesh(new THREE.BoxGeometry(0.8,0.15,0.12),metalMat)));
+  const barrel=new THREE.Mesh(new THREE.CylinderGeometry(0.035,0.035,0.75,8),metalMat);
+  barrel.rotation.z=Math.PI/2; barrel.position.x=0.77; g.add(barrel);
+  const hg=new THREE.Mesh(new THREE.BoxGeometry(0.35,0.1,0.11),woodMat); hg.position.x=0.45; g.add(hg);
+  const mag=new THREE.Mesh(new THREE.BoxGeometry(0.14,0.38,0.1),metalMat);
+  mag.position.set(0.08,-0.24,0); mag.rotation.z=-0.18; g.add(mag);
+  const stock=new THREE.Mesh(new THREE.BoxGeometry(0.32,0.13,0.1),darkWoodMat); stock.position.x=-0.58; g.add(stock);
+  const stockEnd=new THREE.Mesh(new THREE.BoxGeometry(0.06,0.22,0.1),darkWoodMat); stockEnd.position.set(-0.74,-0.04,0); g.add(stockEnd);
+  const pgrip=new THREE.Mesh(new THREE.BoxGeometry(0.1,0.22,0.1),woodMat); pgrip.position.set(-0.15,-0.17,0); pgrip.rotation.z=0.2; g.add(pgrip);
+  const gas=new THREE.Mesh(new THREE.CylinderGeometry(0.025,0.025,0.4,6),metalMat); gas.rotation.z=Math.PI/2; gas.position.set(0.5,0.1,0); g.add(gas);
+  const fsight=new THREE.Mesh(new THREE.BoxGeometry(0.04,0.1,0.04),metalMat); fsight.position.set(1.13,0.1,0); g.add(fsight);
+  return g;
+}
+
+function buildASVAL(){
+  const g=new THREE.Group();
+  const mat=new THREE.MeshLambertMaterial({color:0x1e1e1e});
+  const mat2=new THREE.MeshLambertMaterial({color:0x2a2a2a});
+  g.add(new THREE.Mesh(new THREE.BoxGeometry(0.58,0.13,0.1),mat));
+  const sup=new THREE.Mesh(new THREE.CylinderGeometry(0.055,0.055,0.42,10),mat2); sup.rotation.z=Math.PI/2; sup.position.x=0.5; g.add(sup);
+  const tip=new THREE.Mesh(new THREE.CylinderGeometry(0.03,0.03,0.04,8),mat); tip.rotation.z=Math.PI/2; tip.position.x=0.73; g.add(tip);
+  const mag=new THREE.Mesh(new THREE.BoxGeometry(0.13,0.25,0.08),mat); mag.position.set(0.04,-0.18,0); mag.rotation.z=-0.08; g.add(mag);
+  const stock=new THREE.Mesh(new THREE.BoxGeometry(0.24,0.05,0.06),mat2); stock.position.x=-0.41; g.add(stock);
+  const stockV=new THREE.Mesh(new THREE.BoxGeometry(0.05,0.18,0.06),mat2); stockV.position.set(-0.52,-0.07,0); g.add(stockV);
+  const pg=new THREE.Mesh(new THREE.BoxGeometry(0.08,0.2,0.09),mat); pg.position.set(-0.12,-0.16,0); g.add(pg);
+  const rail=new THREE.Mesh(new THREE.BoxGeometry(0.2,0.04,0.08),mat2); rail.position.set(0.1,0.1,0); g.add(rail);
+  return g;
+}
+
+function buildOlegBeer(){
+  const g=new THREE.Group();
+  const bottleMat=new THREE.MeshLambertMaterial({color:0xC47A1A,transparent:true,opacity:0.88});
+  g.add(new THREE.Mesh(new THREE.CylinderGeometry(0.09,0.11,0.42,12),bottleMat));
+  const neck=new THREE.Mesh(new THREE.CylinderGeometry(0.04,0.09,0.16,10),bottleMat); neck.position.y=0.29; g.add(neck);
+  const cap=new THREE.Mesh(new THREE.CylinderGeometry(0.045,0.045,0.04,10),new THREE.MeshLambertMaterial({color:0x888888})); cap.position.y=0.39; g.add(cap);
+  const label=new THREE.Mesh(new THREE.CylinderGeometry(0.112,0.112,0.18,12),new THREE.MeshLambertMaterial({color:0xD4A017})); label.position.y=-0.05; g.add(label);
+  const wick=new THREE.Mesh(new THREE.CylinderGeometry(0.01,0.01,0.08,6),new THREE.MeshLambertMaterial({color:0x888888})); wick.position.y=0.44; g.add(wick);
+  const flame=new THREE.Mesh(new THREE.ConeGeometry(0.05,0.14,6),new THREE.MeshLambertMaterial({color:0xff6600})); flame.position.y=0.56; g.add(flame);
+  return g;
+}
+
+function buildTsarBomb(){
+  const g=new THREE.Group();
+  const bodyMat=new THREE.MeshLambertMaterial({color:0xCCCCCC});
+  const body=new THREE.Mesh(new THREE.SphereGeometry(0.38,12,8),bodyMat); body.scale.set(1,1.55,1); g.add(body);
+  const nose=new THREE.Mesh(new THREE.ConeGeometry(0.26,0.42,10),new THREE.MeshLambertMaterial({color:0x111111}));
+  nose.position.y=0.62; nose.rotation.x=Math.PI; g.add(nose);
+  const ring=new THREE.Mesh(new THREE.TorusGeometry(0.22,0.03,6,16),new THREE.MeshLambertMaterial({color:0x228822}));
+  ring.position.y=0.1; ring.rotation.x=Math.PI/2; g.add(ring);
+  const finMat=new THREE.MeshLambertMaterial({color:0x333333});
+  for(let i=0;i<4;i++){
+    const fin=new THREE.Mesh(new THREE.BoxGeometry(0.06,0.35,0.32),finMat);
+    fin.position.y=-0.55; fin.position.x=Math.cos(i*Math.PI/2)*0.28; fin.position.z=Math.sin(i*Math.PI/2)*0.28; g.add(fin);
+  }
+  const tail=new THREE.Mesh(new THREE.ConeGeometry(0.15,0.18,8),new THREE.MeshLambertMaterial({color:0xaaaaaa})); tail.position.y=-0.72; g.add(tail);
+  return g;
+}
+
+function buildTank(){
+  const g=new THREE.Group();
+  const mat=new THREE.MeshLambertMaterial({color:0x4E6B3A});
+  const darkMat=new THREE.MeshLambertMaterial({color:0x3A5028});
+  const trackMat=new THREE.MeshLambertMaterial({color:0x1a1a1a});
+  const wheelMat=new THREE.MeshLambertMaterial({color:0x2a3a22});
+  const rimMat=new THREE.MeshLambertMaterial({color:0xcccccc});
+  const hull=new THREE.Mesh(new THREE.BoxGeometry(3.2,0.9,2.0),mat); hull.position.y=0.65; hull.castShadow=true; g.add(hull);
+  const fp=new THREE.Mesh(new THREE.BoxGeometry(0.7,0.9,2.0),darkMat); fp.position.set(1.5,0.65,0); fp.rotation.z=-0.35; g.add(fp);
+  const deck=new THREE.Mesh(new THREE.BoxGeometry(1.0,0.08,1.8),darkMat); deck.position.set(-1.0,1.12,0); g.add(deck);
+  const turretBase=new THREE.Mesh(new THREE.CylinderGeometry(0.72,0.78,0.52,14),mat); turretBase.position.y=1.42; turretBase.castShadow=true; g.add(turretBase);
+  const turretTop=new THREE.Mesh(new THREE.SphereGeometry(0.65,14,8,0,Math.PI*2,0,Math.PI/2),mat); turretTop.position.y=1.68; g.add(turretTop);
+  const hatch=new THREE.Mesh(new THREE.CylinderGeometry(0.2,0.2,0.12,8),darkMat); hatch.position.set(-0.2,2.0,0); g.add(hatch);
+  const barrelGroup=new THREE.Group(); barrelGroup.position.y=1.55;
+  const barrel=new THREE.Mesh(new THREE.CylinderGeometry(0.07,0.07,2.4,10),darkMat); barrel.rotation.x=Math.PI/2; barrel.position.z=1.2; barrelGroup.add(barrel);
+  const muzzle=new THREE.Mesh(new THREE.CylinderGeometry(0.09,0.07,0.18,10),darkMat); muzzle.rotation.x=Math.PI/2; muzzle.position.z=2.4; barrelGroup.add(muzzle);
+  g.add(barrelGroup);
+  const star=new THREE.Mesh(new THREE.CircleGeometry(0.18,5),new THREE.MeshLambertMaterial({color:0xdd2222}));
+  star.position.set(0.1,1.58,0.78); g.add(star);
+  const trackL=new THREE.Mesh(new THREE.BoxGeometry(3.3,0.38,0.3),trackMat); trackL.position.set(0,0.32,-1.05); g.add(trackL);
+  const trackR=new THREE.Mesh(new THREE.BoxGeometry(3.3,0.38,0.3),trackMat); trackR.position.set(0,0.32,1.05); g.add(trackR);
+  const skirtL=new THREE.Mesh(new THREE.BoxGeometry(3.1,0.22,0.06),darkMat); skirtL.position.set(0,0.7,-1.12); g.add(skirtL);
+  const skirtR=new THREE.Mesh(new THREE.BoxGeometry(3.1,0.22,0.06),darkMat); skirtR.position.set(0,0.7,1.12); g.add(skirtR);
+  for(let i=0;i<5;i++){
+    const wx=-1.2+i*0.6;
+    for(let s of[-1,1]){
+      const wz=s*1.02;
+      const wh=new THREE.Mesh(new THREE.CylinderGeometry(0.28,0.28,0.18,12),wheelMat); wh.rotation.x=Math.PI/2; wh.position.set(wx,0.3,wz); g.add(wh);
+      const rim=new THREE.Mesh(new THREE.TorusGeometry(0.22,0.04,6,12),rimMat); rim.rotation.x=Math.PI/2; rim.position.set(wx,0.3,wz+s*0.06); g.add(rim);
+    }
+  }
+  const spFront=new THREE.Mesh(new THREE.CylinderGeometry(0.25,0.25,0.22,10),darkMat); spFront.rotation.x=Math.PI/2; spFront.position.set(1.55,0.35,0); g.add(spFront);
+  const idler=new THREE.Mesh(new THREE.CylinderGeometry(0.22,0.22,0.22,10),darkMat); idler.rotation.x=Math.PI/2; idler.position.set(-1.55,0.35,0); g.add(idler);
+  g.userData={barrelGroup};
+  return g;
+}
+
+function buildPlane(){
+  const g=new THREE.Group();
+  // Fuselage
+  const fusMat=new THREE.MeshLambertMaterial({color:0x4a5a3a});
+  const darkMat=new THREE.MeshLambertMaterial({color:0x2e3a25});
+  const glassMat=new THREE.MeshLambertMaterial({color:0x88bbff,transparent:true,opacity:0.7});
+  const engineMat=new THREE.MeshLambertMaterial({color:0x1a1a1a});
+  const fus=new THREE.Mesh(new THREE.CylinderGeometry(0.28,0.18,5.5,10),fusMat);
+  fus.rotation.z=Math.PI/2; g.add(fus);
+  // Nose cone
+  const nose=new THREE.Mesh(new THREE.ConeGeometry(0.28,1.1,10),darkMat);
+  nose.rotation.z=-Math.PI/2; nose.position.x=3.3; g.add(nose);
+  // Tail cone
+  const tail=new THREE.Mesh(new THREE.ConeGeometry(0.15,0.9,8),darkMat);
+  tail.rotation.z=Math.PI/2; tail.position.x=-3.2; g.add(tail);
+  // Main wings
+  const wingGeo=new THREE.BoxGeometry(0.12,0.55,7.5);
+  const wingL=new THREE.Mesh(wingGeo,fusMat); wingL.position.set(-0.3,0,0); g.add(wingL);
+  // Wing sweep
+  const swpL=new THREE.Mesh(new THREE.BoxGeometry(0.1,0.4,3.0),darkMat); swpL.position.set(0.6,0,2.8); swpL.rotation.x=0.18; g.add(swpL);
+  const swpR=new THREE.Mesh(new THREE.BoxGeometry(0.1,0.4,3.0),darkMat); swpR.position.set(0.6,0,-2.8); swpR.rotation.x=-0.18; g.add(swpR);
+  // Wing tips
+  const tipL=new THREE.Mesh(new THREE.BoxGeometry(0.08,0.25,0.5),darkMat); tipL.position.set(0.7,0,4.1); g.add(tipL);
+  const tipR=new THREE.Mesh(new THREE.BoxGeometry(0.08,0.25,0.5),darkMat); tipR.position.set(0.7,0,-4.1); g.add(tipR);
+  // Horizontal stabilizers
+  const hStabL=new THREE.Mesh(new THREE.BoxGeometry(0.08,0.3,2.4),fusMat); hStabL.position.set(-2.6,0,1.5); g.add(hStabL);
+  const hStabR=new THREE.Mesh(new THREE.BoxGeometry(0.08,0.3,2.4),fusMat); hStabR.position.set(-2.6,0,-1.5); g.add(hStabR);
+  // Vertical stabilizer
+  const vStab=new THREE.Mesh(new THREE.BoxGeometry(0.08,1.6,0.9),fusMat); vStab.position.set(-2.5,0.8,0); g.add(vStab);
+  // Cockpit
+  const cockpit=new THREE.Mesh(new THREE.BoxGeometry(0.6,0.3,0.55),glassMat); cockpit.position.set(1.4,0.3,0); g.add(cockpit);
+  // Cockpit frame
+  const frame=new THREE.Mesh(new THREE.BoxGeometry(0.65,0.08,0.6),darkMat); frame.position.set(1.4,0.44,0); g.add(frame);
+  // Engines (x4, under wings)
+  const engGeo=new THREE.CylinderGeometry(0.14,0.12,0.9,10);
+  const engPositions=[[0.1,0,1.5],[0.1,0,2.8],[0.1,0,-1.5],[0.1,0,-2.8]];
+  engPositions.forEach(p=>{
+    const eng=new THREE.Mesh(engGeo,engineMat); eng.rotation.z=Math.PI/2;
+    eng.position.set(p[0]-0.55,p[1]-0.2,p[2]); g.add(eng);
+    // Intake ring
+    const ring=new THREE.Mesh(new THREE.TorusGeometry(0.14,0.025,6,12),engineMat);
+    ring.rotation.y=Math.PI/2; ring.position.set(p[0]-0.1,p[1]-0.2,p[2]); g.add(ring);
+    // Exhaust glow
+    const exhaust=new THREE.Mesh(new THREE.CircleGeometry(0.1,8),new THREE.MeshLambertMaterial({color:0xff6600}));
+    exhaust.rotation.y=Math.PI/2; exhaust.position.set(p[0]-1.01,p[1]-0.2,p[2]); g.add(exhaust);
+  });
+  // Bomb bay door
+  const bayDoor=new THREE.Mesh(new THREE.BoxGeometry(0.9,0.06,0.7),darkMat); bayDoor.position.set(-0.2,-0.29,0); g.add(bayDoor);
+  // Markings - red star
+  const starMat=new THREE.MeshLambertMaterial({color:0xdd2222});
+  const star=new THREE.Mesh(new THREE.CircleGeometry(0.22,5),starMat); star.rotation.x=-Math.PI/2; star.position.set(0,0.3,0); g.add(star);
+  // Nav lights
+  const redLight=new THREE.Mesh(new THREE.SphereGeometry(0.06,6,6),new THREE.MeshLambertMaterial({color:0xff0000,emissive:0xff0000,emissiveIntensity:1}));
+  redLight.position.set(0.7,0,4.2); g.add(redLight);
+  const greenLight=new THREE.Mesh(new THREE.SphereGeometry(0.06,6,6),new THREE.MeshLambertMaterial({color:0x00ff00,emissive:0x00ff00,emissiveIntensity:1}));
+  greenLight.position.set(0.7,0,-4.2); g.add(greenLight);
+  const whiteLight=new THREE.Mesh(new THREE.SphereGeometry(0.06,6,6),new THREE.MeshLambertMaterial({color:0xffffff,emissive:0xffffff,emissiveIntensity:1}));
+  whiteLight.position.set(-3.2,0,0); g.add(whiteLight);
+  return g;
+}
+
+// Scene objects
+const devesh=buildDevesh(); devesh.position.set(0,1.2,-18); devesh.scale.set(1.8,1.8,1.8); scene.add(devesh);
+
+// Player weapons - bottom right of screen like reference image
+const playerGunGroup=new THREE.Group();
+const asValModel=buildASVAL(); asValModel.position.set(0.4,-0.35,-0.6); asValModel.rotation.set(0,-Math.PI/2,0);
+const molotovModel=buildOlegBeer(); molotovModel.position.set(0.3,-0.26,-0.45); molotovModel.rotation.set(0,-0.1,-0.35); molotovModel.visible=false;
+playerGunGroup.add(asValModel,molotovModel);
+playerGunGroup.visible=false; // Hide gun models for orbital camera view
+camera.add(playerGunGroup); scene.add(camera);
+
+const tanks=[]; let tanksSpawned=false;
+const fireSpots=[];
+// Airstrike system (Phase 3+)
+const airPlanes=[];
+let airstrikeTimer=0;
+let airstrikeSpawned=false;
+const airbombs=[];
+const playerBullets=[], enemyBullets=[], tsarBombs=[], molotovThrows=[], explosionParts=[];
+
+addEventListener('keydown',e=>{
+  keys[e.code]=true;
+  if(gameState!=='playing') return;
+  if(e.code==='KeyE'&&molotovUnlocked){ playerWeapon='molotov'; asValModel.visible=false; molotovModel.visible=true; }
+  if(e.code==='KeyQ'){ playerWeapon='asval'; asValModel.visible=true; molotovModel.visible=false; }
+});
+addEventListener('keyup',e=>{ keys[e.code]=false; });
+addEventListener('mousemove',e=>{
+  if(!locked||gameState!=='playing') return;
+  yaw-=e.movementX*0.002;
+  pitch=Math.max(-1.2,Math.min(1.2,pitch-e.movementY*0.002));
+});
+addEventListener('click',()=>{
+  if(gameState!=='playing') return;
+  if(!locked){ document.getElementById('c').requestPointerLock(); return; }
+  shoot();
+});
+document.addEventListener('pointerlockchange',()=>{ locked=!!document.pointerLockElement; });
+
+// Build a falling bomb mesh
+function buildAirbomb(){
+  const g=new THREE.Group();
+  const body=new THREE.Mesh(new THREE.CylinderGeometry(0.11,0.09,0.6,8),new THREE.MeshLambertMaterial({color:0x333333}));
+  body.rotation.z=Math.PI/2; g.add(body);
+  const nose=new THREE.Mesh(new THREE.ConeGeometry(0.09,0.22,8),new THREE.MeshLambertMaterial({color:0x111111}));
+  nose.rotation.z=-Math.PI/2; nose.position.x=0.41; g.add(nose);
+  const ring=new THREE.Mesh(new THREE.TorusGeometry(0.1,0.02,6,10),new THREE.MeshLambertMaterial({color:0xffcc00}));
+  ring.rotation.y=Math.PI/2; ring.position.x=-0.1; g.add(ring);
+  for(let i=0;i<4;i++){
+    const fin=new THREE.Mesh(new THREE.BoxGeometry(0.28,0.04,0.12),new THREE.MeshLambertMaterial({color:0x444444}));
+    fin.position.x=-0.22; fin.position.y=Math.cos(i*Math.PI/2)*0.13; fin.position.z=Math.sin(i*Math.PI/2)*0.13; g.add(fin);
+  }
+  return g;
+}
+
+function spawnAirstrikeWave(){
+  if(!airstrikeSpawned) return;
+  const angles=[0.55, 2.2, 3.9]; // 3 planes at different angles across the arena
+  angles.forEach((entryAngle,pi)=>{
+    const altitude=28+pi*2.5;
+    // Pick a fly-through direction across the arena
+    const flyDir=new THREE.Vector3(Math.cos(entryAngle), 0, Math.sin(entryAngle)).normalize();
+    const startPos=flyDir.clone().multiplyScalar(-(arenaR+35));
+    startPos.y=altitude;
+    const plane=buildPlane();
+    plane.position.copy(startPos);
+    // Orient plane along flight path
+    plane.rotation.y=Math.atan2(-flyDir.x, -flyDir.z);
+    plane.scale.set(2.2,2.2,2.2);
+    scene.add(plane);
+    // Sample player pos when bombs will be in the middle of the run
+    const bombDropStartX=flyDir.x*(-arenaR*0.7);
+    const bombDropStartZ=flyDir.z*(-arenaR*0.7);
+    plane.userData={
+      flyDir: flyDir.clone(),
+      speed: 0.55+pi*0.04,
+      bombsDropped: 0,
+      bombTimer: 0,
+      bombDropped: false,
+      done: false,
+      piIdx: pi,
+      startBombX: bombDropStartX,
+      startBombZ: bombDropStartZ,
+    };
+    airPlanes.push(plane);
+  });
+  screenShake(1.2);
+}
+
+function startGame() {
+  console.log('Starting game...');
+  const startScreen = document.getElementById('start-screen');
+  if(startScreen) startScreen.style.display='none';
+  gameState='playing';
+  console.log('Game state set to playing');
+  const canvas = document.getElementById('c');
+  if(canvas) {
+    console.log('Requesting pointer lock');
+    canvas.requestPointerLock();
+  }
+  playerGunGroup.visible = true;
+  // Trigger an initial render
+  renderer.render(scene, camera);
+}
+
+const startBtn = document.getElementById('start-btn');
+if(startBtn) {
+  startBtn.addEventListener('click', startGame);
+} else {
+  console.error('Start button not found');
+}
+
+function createBullet(color,r,speed,dmg,type,from,dir){
+  const m=new THREE.Mesh(new THREE.SphereGeometry(r,6,6),new THREE.MeshLambertMaterial({color}));
+  m.position.copy(from);
+  const b={mesh:m,vel:dir.clone().multiplyScalar(speed),life:150,dmg,type};
+  scene.add(m); return b;
+}
+
+function shoot(){
+  if(shootCooldown>0) return;
+  const dir=new THREE.Vector3(); camera.getWorldDirection(dir);
+  if(playerWeapon==='asval'){
+    shootCooldown=0.08;
+    playerBullets.push(createBullet(0xffee44,0.06,2.5,50,'player',camera.position.clone().addScaledVector(dir,0.8),dir));
+  } else if(playerWeapon==='molotov'&&molotovCount>0&&molotovCooldown<=0){
+    const mesh=buildOlegBeer(); mesh.position.copy(camera.position).addScaledVector(dir,0.8);
+    molotovThrows.push({mesh,vel:dir.clone().multiplyScalar(0.5).add(new THREE.Vector3(0,0.28,0)),life:100});
+    scene.add(mesh); molotovCount--;
+    if(molotovCount<=0){molotovCooldown=7;molotovCount=3;}
+  }
+}
+
+function spawnEnemyBullet(from,spd,color,dmg){
+  const toP=camera.position.clone().sub(from).normalize();
+  const b=createBullet(color,0.12,spd,dmg,'boss',from.clone(),toP);
+  b.homing=true; b.homingStr=0.018; b.speed=spd;
+  enemyBullets.push(b);
+}
+
+function spawnTankMissile(from){
+  const toP=camera.position.clone().sub(from).normalize();
+  const m=new THREE.Mesh(new THREE.CylinderGeometry(0.1,0.1,0.45,8),new THREE.MeshLambertMaterial({color:0xff6600}));
+  m.position.copy(from); scene.add(m);
+  enemyBullets.push({mesh:m,vel:toP.multiplyScalar(1.6),life:220,dmg:75,type:'tank',homing:true,homingStr:0.03,speed:1.6});
+}
+
+function explode(pos,sc=1){
+  for(let i=0;i<16;i++){
+    const m=new THREE.Mesh(new THREE.SphereGeometry(0.055*sc,5,5),new THREE.MeshLambertMaterial({color:i%2?0xff4400:0xffaa00}));
+    m.position.copy(pos); scene.add(m);
+    explosionParts.push({mesh:m,vel:new THREE.Vector3((Math.random()-.5)*0.5*sc,Math.random()*0.5*sc,(Math.random()-.5)*0.5*sc),life:28});
+  }
+}
+
+function deveshDeathExplosion(){
+  const center=devesh.position.clone().add(new THREE.Vector3(0,4*1.8,0));
+  // Waves of particles bursting out from body
+  const waveOffsets=[0,200,420,680,1000];
+  waveOffsets.forEach((delay,wi)=>{
+    setTimeout(()=>{
+      if(gameState!=='won') return;
+      const wPos=devesh.position.clone().add(new THREE.Vector3(
+        (Math.random()-.5)*3, (1+Math.random()*5)*1.8, (Math.random()-.5)*3));
+      screenShake(1.2+wi*0.3);
+      // Brown skin/flesh chunks
+      for(let i=0;i<22;i++){
+        const sz=0.12+Math.random()*0.22;
+        const geo=Math.random()<0.5
+          ? new THREE.BoxGeometry(sz,sz*0.6,sz*0.5)
+          : new THREE.SphereGeometry(sz*0.55,5,4);
+        const col=[0x7B4C20,0xC8864A,0x4F2E14,0xDFAF7A][Math.floor(Math.random()*4)];
+        const m=new THREE.Mesh(geo,new THREE.MeshLambertMaterial({color:col}));
+        m.position.copy(wPos); scene.add(m);
+        const spd=0.18+Math.random()*0.38;
+        const ang=Math.random()*Math.PI*2;
+        explosionParts.push({mesh:m,
+          vel:new THREE.Vector3(Math.cos(ang)*spd,(0.3+Math.random()*0.55),(Math.sin(ang)*spd)),
+          life:55+Math.random()*30});
+      }
+      // Dark smoke puffs (dark grey spheres that drift up slowly)
+      for(let i=0;i<10;i++){
+        const sz=0.28+Math.random()*0.45;
+        const grey=Math.floor(0x20+Math.random()*0x28);
+        const col=(grey<<16)|(grey<<8)|grey;
+        const m=new THREE.Mesh(new THREE.SphereGeometry(sz,6,5),
+          new THREE.MeshLambertMaterial({color:col,transparent:true,opacity:0.82}));
+        m.position.copy(wPos).add(new THREE.Vector3((Math.random()-.5)*1.5,Math.random()*2,(Math.random()-.5)*1.5));
+        scene.add(m);
+        explosionParts.push({mesh:m,
+          vel:new THREE.Vector3((Math.random()-.5)*0.04,0.04+Math.random()*0.07,(Math.random()-.5)*0.04),
+          life:90+Math.random()*50});
+      }
+      // Fire sparks
+      for(let i=0;i<14;i++){
+        const m=new THREE.Mesh(new THREE.SphereGeometry(0.07,4,4),
+          new THREE.MeshLambertMaterial({color:i%2?0xff2200:0xffaa00}));
+        m.position.copy(wPos); scene.add(m);
+        const spd=0.22+Math.random()*0.5;
+        const ang=Math.random()*Math.PI*2;
+        explosionParts.push({mesh:m,
+          vel:new THREE.Vector3(Math.cos(ang)*spd,0.15+Math.random()*0.6,Math.sin(ang)*spd),
+          life:30+Math.random()*20});
+      }
+      // Add a fire spot on the ground
+      addFire(devesh.position.clone().add(new THREE.Vector3((Math.random()-.5)*4,0,(Math.random()-.5)*4)));
+      // Final wave: remove devesh mesh and show win
+      if(wi===waveOffsets.length-1){
+        setTimeout(()=>{
+          scene.remove(devesh);
+          document.exitPointerLock();
+          setTimeout(()=>showMsg('🏆 DEVESH DEFEATED!\nYou win!',99999),400);
+        },300);
+      }
+    },delay);
+  });
+}
+
+function screenShake(n=1){
+  let t=0; const iv=setInterval(()=>{
+    renderer.domElement.style.transform=`translate(${(Math.random()-.5)*9*n}px,${(Math.random()-.5)*9*n}px)`;
+    if(++t>9){renderer.domElement.style.transform='';clearInterval(iv);}
+  },28);
+}
+
+function flashDmg(){ const el=document.getElementById('dmg-flash'); el.style.background='rgba(255,0,0,0.38)'; setTimeout(()=>{el.style.background='rgba(255,0,0,0)';},110); }
+function addFire(pos){
+  const m=new THREE.Mesh(new THREE.CircleGeometry(0.85,8),new THREE.MeshLambertMaterial({color:0xff4400,transparent:true,opacity:0.7}));
+  m.rotation.x=-Math.PI/2; m.position.copy(pos); m.position.y=0.05; scene.add(m);
+  fireSpots.push({pos:pos.clone(),mesh:m,life:380,dmgTimer:0});
+}
+function showMsg(txt,dur=900){ const el=document.getElementById('msg'); el.textContent=txt; el.style.display='block'; setTimeout(()=>{el.style.display='none';},dur); }
+
+function spawnTanks(){
+  for(let i=0;i<2;i++){
+    const t=buildTank(); const a=i===0?Math.PI*0.3:Math.PI*1.1;
+    t.position.set(Math.cos(a)*22,0,Math.sin(a)*22);
+    t.userData.shootTimer=2+Math.random()*2; t.userData.orbitAngle=a;
+    scene.add(t); tanks.push(t);
+  }
+  tanksSpawned=true;
+}
+
+function spawnTsarBomb(){
+  const b=buildTsarBomb();
+  const mouthPos=devesh.position.clone().add(new THREE.Vector3(0,4.8*1.8,0));
+  b.position.copy(mouthPos);
+  let vel;
+  if(phase>=4){
+    // Phase 4: high arc directly toward player, no random scatter
+    const toPlayer=new THREE.Vector3(camera.position.x-mouthPos.x,0,camera.position.z-mouthPos.z).normalize();
+    vel=toPlayer.clone().multiplyScalar(0.9).add(new THREE.Vector3(0,3.2,0));
+  } else {
+    const dirAngle = Math.random() * Math.PI * 2;
+    const dir = new THREE.Vector3(Math.cos(dirAngle), 0, Math.sin(dirAngle));
+    vel=dir.clone().multiplyScalar(1.0).add(new THREE.Vector3(0,2.0,0));
+  }
+  b.userData={vel,grav:-0.12,life:200,animT:0,dmg:400};
+  scene.add(b); tsarBombs.push(b);
+}
+
+function updatePhase(){
+  const prev=phase;
+  if(bossHP>6500) phase=1;
+else if(bossHP>4500) phase=2;
+else if(bossHP>2500) phase=3;
+else phase=4;
+  const labels=['','Phase 1 — Easy','Phase 2 — Normal','Phase 3 — Hard','Phase 4 — EXTREME'];
+  // Boss bar color changes per phase
+  const bf=document.getElementById('boss-fill');
+  if(phase===4) bf.style.background='linear-gradient(90deg,#9b59b6,#8e44ad)';
+  else if(phase===3) bf.style.background='linear-gradient(90deg,#e74c3c,#c0392b)';
+  else if(phase===2) bf.style.background='linear-gradient(90deg,#e67e22,#d35400)';
+  else bf.style.background='linear-gradient(90deg,#e74c3c,#c0392b)';
+  if(phase>=2) devesh.userData.handL.children[0].visible = true;
+  if(phase>=3&&!tanksSpawned) spawnTanks();
+  if(phase>=3&&!airstrikeSpawned){ airstrikeSpawned=true; airstrikeTimer=3; } // first wave in 3s
+  if(phase!==prev) showMsg(labels[phase]);
+}
+
+let last=0;
+
+function animate(t){
+  requestAnimationFrame(animate);
+  const dt=Math.min((t-last)/16.67,3); last=t;
+  
+  try {
+    if(gameState!=='playing'){renderer.render(scene,camera);return;}
+
+    // Standard first-person movement on the ground
+    camera.rotation.order='YXZ';
+    camera.rotation.y=yaw;
+    camera.rotation.x=pitch;
+
+    const fw=new THREE.Vector3(-Math.sin(yaw),0,-Math.cos(yaw));
+    const rt=new THREE.Vector3(Math.cos(yaw),0,-Math.sin(yaw));
+    const mv=new THREE.Vector3();
+    if(keys['KeyW']) mv.add(fw);
+    if(keys['KeyS']) mv.sub(fw);
+    if(keys['KeyA']) mv.sub(rt);
+    if(keys['KeyD']) mv.add(rt);
+    if(mv.length()>0) mv.normalize().multiplyScalar(0.24*dt);
+    camera.position.add(mv);
+    camera.position.y=1.7;
+
+    const pr=Math.sqrt(camera.position.x**2+camera.position.z**2);
+    if(pr>arenaR-1.6){const a=Math.atan2(camera.position.z,camera.position.x);camera.position.x=Math.cos(a)*(arenaR-1.6);camera.position.z=Math.sin(a)*(arenaR-1.6);}
+
+  const targetAngle=Math.atan2(camera.position.x-devesh.position.x,camera.position.z-devesh.position.z);
+  let deltaAngle=targetAngle-deveshTargetAngle;
+  deltaAngle=Math.atan2(Math.sin(deltaAngle),Math.cos(deltaAngle));
+  deveshTargetAngle+=deltaAngle*0.04*dt;
+  const spd=(phase>=4?0.16:phase>=3?0.13:phase>=2?0.1:0.065)*dt;
+  const dist=Math.sqrt((camera.position.x-devesh.position.x)**2+(camera.position.z-devesh.position.z)**2);
+  if(dist>4.5){
+    devesh.position.x+=Math.sin(deveshTargetAngle)*spd;
+    devesh.position.z+=Math.cos(deveshTargetAngle)*spd;
+  }
+  deveshAngle=Math.atan2(camera.position.x-devesh.position.x,camera.position.z-devesh.position.z);
+  devesh.rotation.y=deveshTargetAngle;
+  deveshWalkCycle+=0.09*dt;
+  if(devesh.userData.legL){
+    devesh.userData.legL.rotation.x=Math.sin(deveshWalkCycle)*0.42;
+    devesh.userData.legR.rotation.x=-Math.sin(deveshWalkCycle)*0.42;
+    devesh.userData.armL.rotation.x=-Math.sin(deveshWalkCycle)*0.28;
+    devesh.userData.armR.rotation.x=Math.sin(deveshWalkCycle)*0.28;
+    devesh.userData.handL.rotation.x=Math.sin(deveshWalkCycle)*0.3;
+    devesh.userData.handR.rotation.x=-Math.sin(deveshWalkCycle)*0.3;
+  }
+  updatePhase();
+
+  if(molotovCooldown>0){
+    molotovCooldown-=dt/60;
+    if(molotovCooldown<=0) molotovCooldown=0;
+  }
+  if(playerHP<=500&&!molotovUnlocked){
+    molotovUnlocked=true;
+    showMsg('🍺 Oleg Beer Molotov Unlocked!\nPress E to switch');
+  }
+
+  const bossHead=devesh.position.clone().add(new THREE.Vector3(0,4.4*1.8,0));
+  shootCooldown=Math.max(0, shootCooldown-dt);
+  pistolTimer-=dt; if(pistolTimer<=0){pistolTimer=30; 
+    spawnEnemyBullet(bossHead,0.5,0xff8800,10);
+  }
+  if(phase>=2){akTimer-=dt; if(akTimer<=0){akTimer=6; 
+    spawnEnemyBullet(bossHead,1.0,0xff2200,10);
+  }}
+  if(phase>=4){tsarTimer-=dt;if(tsarTimer<=0){tsarTimer=0.7;spawnTsarBomb();}}
+
+  // ─── Airstrike system (Phase 3+) ───
+  if(airstrikeSpawned && phase>=3){
+    airstrikeTimer-=dt/60;
+    if(airstrikeTimer<=0 && airPlanes.length===0){
+      airstrikeTimer=5; // next wave in 5s
+      spawnAirstrikeWave();
+    }
+    // Update each plane
+    for(let i=airPlanes.length-1;i>=0;i--){
+      const pl=airPlanes[i];
+      const ud=pl.userData;
+      // Move plane forward
+      pl.position.x+=ud.flyDir.x*ud.speed*dt;
+      pl.position.z+=ud.flyDir.z*ud.speed*dt;
+      // Subtle banking wobble
+      pl.rotation.z=Math.sin(Date.now()*0.001+ud.piIdx)*0.06;
+
+      // Bomb drop logic: start dropping when plane is within arenaR*0.85 of centre
+      const distFromCentre=Math.sqrt(pl.position.x**2+pl.position.z**2);
+      if(!ud.bombDropped && distFromCentre<arenaR*0.85 && ud.bombsDropped<10){
+        ud.bombTimer-=dt;
+        if(ud.bombTimer<=0){
+          ud.bombTimer=0.07*60;
+          const isP4 = phase>=4;
+          // Target: player pos, no random scatter in phase 4
+          const px = camera.position.x + (isP4 ? 0 : (Math.random()-0.5)*3.5);
+          const pz = camera.position.z + (isP4 ? 0 : (Math.random()-0.5)*3.5);
+          const bomb=buildAirbomb();
+          bomb.position.set(pl.position.x, pl.position.y-1.5, pl.position.z);
+          const hDist=new THREE.Vector2(px-bomb.position.x, pz-bomb.position.z);
+          const h=bomb.position.y;
+          const gWorld=0.018;
+          const fallTime=Math.sqrt(2*h/gWorld)*0.7;
+          const hSpeed=hDist.length()/Math.max(fallTime,1);
+          const horizDir=new THREE.Vector3(hDist.x,0,hDist.y).normalize();
+          // Phase 4: add an upward kick so bomb arcs high before curving down
+          const upKick = isP4 ? 0.55 : 0;
+          bomb.userData={
+            vel: new THREE.Vector3(horizDir.x*hSpeed*0.6, upKick, horizDir.z*hSpeed*0.6),
+            grav: gWorld,
+            life: isP4 ? 420 : 300,
+            isP4,
+          };
+          scene.add(bomb);
+          airbombs.push(bomb);
+          ud.bombsDropped++;
+          if(ud.bombsDropped>=10) ud.bombDropped=true;
+        }
+      }
+      // Remove plane once past arena
+      if(distFromCentre>arenaR+50){
+        scene.remove(pl);
+        airPlanes.splice(i,1);
+      }
+    }
+    // Update bombs
+    for(let i=airbombs.length-1;i>=0;i--){
+      const b=airbombs[i];
+      // Curve horizontally toward player; stronger in phase 4
+      const homStr = b.userData.isP4 ? 0.04 : 0.025;
+      const toPlayer=new THREE.Vector3(camera.position.x-b.position.x,0,camera.position.z-b.position.z).normalize();
+      b.userData.vel.x+=(toPlayer.x*0.5 - b.userData.vel.x)*homStr*dt;
+      b.userData.vel.z+=(toPlayer.z*0.5 - b.userData.vel.z)*homStr*dt;
+      b.userData.vel.y-=b.userData.grav*dt;
+      b.position.addScaledVector(b.userData.vel,dt);
+      // Spin bomb
+      b.rotation.z+=0.08*dt;
+      b.userData.life-=dt;
+      // Hit player
+      if(b.position.distanceTo(camera.position)<1.5){
+        playerHP=Math.max(0,playerHP-120);
+        flashDmg(); screenShake(2.2);
+        explode(b.position,2.2);
+        addFire(b.position);
+        scene.remove(b); airbombs.splice(i,1); continue;
+      }
+      // Hit ground
+      if(b.position.y<=0.2){
+        screenShake(1.8);
+        explode(b.position,2.5);
+        addFire(b.position);
+        scene.remove(b); airbombs.splice(i,1); continue;
+      }
+      if(b.userData.life<=0){ scene.remove(b); airbombs.splice(i,1); }
+    }
+  }
+
+  tanks.forEach(tk=>{
+    tk.userData.orbitAngle+=(0.004+(phase>=4?0.003:0))*dt;
+    const tr=20+Math.sin(tk.userData.orbitAngle*0.4)*4;
+    tk.position.x=Math.cos(tk.userData.orbitAngle)*tr; tk.position.z=Math.sin(tk.userData.orbitAngle)*tr;
+    if(tk.userData.barrelGroup) tk.rotation.y=Math.atan2(camera.position.x-tk.position.x,camera.position.z-tk.position.z);
+    tk.userData.shootTimer-=dt/60;
+    if(tk.userData.shootTimer<=0){tk.userData.shootTimer=1+Math.random()*0.5;spawnTankMissile(tk.position.clone().add(new THREE.Vector3(0,1.6,0)));}
+  });
+
+  for(let i=playerBullets.length-1;i>=0;i--){
+    const b=playerBullets[i]; b.mesh.position.add(b.vel); b.life-=dt;
+    if(b.mesh.position.distanceTo(devesh.position.clone().add(new THREE.Vector3(0,3.5*1.8,0)))<3.8){bossHP=Math.max(0,bossHP-b.dmg);scene.remove(b.mesh);playerBullets.splice(i,1);continue;}
+    if(b.life<=0){scene.remove(b.mesh);playerBullets.splice(i,1);}
+  }
+
+  for(let i=enemyBullets.length-1;i>=0;i--){
+    const b=enemyBullets[i];
+    // Homing: steer toward player from the moment of spawn using a steering force
+    if(b.homing){
+      const toPlayer=camera.position.clone().sub(b.mesh.position).normalize();
+      const str=b.homingStr||0.02;
+      b.vel.x+=(toPlayer.x*( b.speed||1.0) - b.vel.x)*str*dt;
+      b.vel.z+=(toPlayer.z*(b.speed||1.0) - b.vel.z)*str*dt;
+      b.vel.y+=(toPlayer.y*(b.speed||1.0) - b.vel.y)*str*dt;
+    }
+    b.mesh.position.add(b.vel); b.life-=dt;
+    if(b.mesh.position.distanceTo(camera.position)<0.85){
+      playerHP=Math.max(0,playerHP-b.dmg); flashDmg();
+      if(b.type==='tank'){screenShake(1.6);explode(b.mesh.position,1.5);}
+      scene.remove(b.mesh);enemyBullets.splice(i,1);continue;
+    }
+    const r2=Math.sqrt(b.mesh.position.x**2+b.mesh.position.z**2);
+    if(b.type==='tank'&&(r2>arenaR-0.8||b.mesh.position.y<0.3)){screenShake(1.6);explode(b.mesh.position,1.5);scene.remove(b.mesh);enemyBullets.splice(i,1);continue;}
+    if(b.life<=0){scene.remove(b.mesh);enemyBullets.splice(i,1);}
+  }
+
+  for(let i=tsarBombs.length-1;i>=0;i--){
+    const b=tsarBombs[i];
+    // Gently curve horizontal velocity toward player; stronger in phase 4
+    const homStr = phase>=4 ? 0.038 : 0.022;
+    const toPlayer=new THREE.Vector3(camera.position.x-b.position.x,0,camera.position.z-b.position.z).normalize();
+    b.userData.vel.x+=(toPlayer.x*0.09 - b.userData.vel.x)*homStr*dt;
+    b.userData.vel.z+=(toPlayer.z*0.09 - b.userData.vel.z)*homStr*dt;
+    b.userData.vel.y+=b.userData.grav*dt; b.position.addScaledVector(b.userData.vel,dt);
+    b.userData.animT+=dt*0.05; b.rotation.z=Math.sin(b.userData.animT)*0.45; b.userData.life-=dt;
+    const r2 = b.position.x**2 + b.position.z**2;
+    if(r2 > (arenaR - 1)**2){
+      const normal = new THREE.Vector3(b.position.x, 0, b.position.z).normalize();
+      b.userData.vel.reflect(normal);
+      const r = Math.sqrt(r2);
+      const pushBack = (arenaR - 1.2) / r;
+      b.position.x *= pushBack; b.position.z *= pushBack;
+    }
+    if(b.position.distanceTo(camera.position)<1.8){playerHP=Math.max(0,playerHP-b.userData.dmg);flashDmg();screenShake(3);addFire(b.position);explode(b.position,4);scene.remove(b);tsarBombs.splice(i,1);continue;}
+    if(b.position.y<=0.3){screenShake(2);explode(b.position,4);addFire(b.position);scene.remove(b);tsarBombs.splice(i,1);continue;}
+    if(b.userData.life<=0){scene.remove(b);tsarBombs.splice(i,1);}
+  }
+
+  for(let i=molotovThrows.length-1;i>=0;i--){
+    const m=molotovThrows[i]; m.vel.y-=0.018*dt; m.mesh.position.addScaledVector(m.vel,dt); m.mesh.rotation.z+=0.12*dt; m.life-=dt;
+    if(m.mesh.position.distanceTo(devesh.position.clone().add(new THREE.Vector3(0,3.5*1.8,0)))<4.0){bossHP=Math.max(0,bossHP-150);explode(m.mesh.position,1.2);addFire(m.mesh.position);scene.remove(m.mesh);molotovThrows.splice(i,1);continue;}
+    if(m.mesh.position.y<=0.2||m.life<=0){addFire(m.mesh.position);explode(m.mesh.position,1);scene.remove(m.mesh);molotovThrows.splice(i,1);}
+  }
+
+  let onFire=false;
+  for(let i=fireSpots.length-1;i>=0;i--){
+    const f=fireSpots[i]; f.life-=dt; f.mesh.material.opacity=0.45+Math.sin(f.life*0.06+i)*0.22;
+    const fd=Math.sqrt((camera.position.x-f.pos.x)**2+(camera.position.z-f.pos.z)**2);
+    if(fd<0.95){onFire=true;f.dmgTimer-=dt;if(f.dmgTimer<=0){playerHP=Math.max(0,playerHP-10);flashDmg();f.dmgTimer=30;}}
+    if(f.life<=0){scene.remove(f.mesh);fireSpots.splice(i,1);}
+  }
+  document.getElementById('fire-warn') && (document.getElementById('fire-warn').style.display='none');
+
+  for(let i=explosionParts.length-1;i>=0;i--){
+    const e=explosionParts[i]; e.mesh.position.add(e.vel); e.vel.y-=0.022; e.life-=dt;
+    if(e.life<=0){scene.remove(e.mesh);explosionParts.splice(i,1);}
+  }
+
+  document.getElementById('player-fill').style.width=(playerHP/1000*100)+'%';
+  document.getElementById('player-hp-text').textContent=Math.ceil(playerHP)+' / 1000';
+  document.getElementById('boss-fill').style.width=(bossHP/bossMax*100)+'%';
+  document.getElementById('boss-hp-text').textContent=Math.ceil(bossHP)+' / '+bossMax;
+  if(molotovUnlocked){/* count tracked internally */}
+
+    if(playerHP<=0&&gameState==='playing'){
+  gameState='dead';
+  document.exitPointerLock();
+
+  // --- Clear all projectiles, fire, explosions ---
+  [...playerBullets].forEach(b=>{scene.remove(b.mesh);}); playerBullets.length=0;
+  [...enemyBullets].forEach(b=>{scene.remove(b.mesh);}); enemyBullets.length=0;
+  [...tsarBombs].forEach(b=>{scene.remove(b);}); tsarBombs.length=0;
+  [...airbombs].forEach(b=>{scene.remove(b);}); airbombs.length=0;
+  [...molotovThrows].forEach(m=>{scene.remove(m.mesh);}); molotovThrows.length=0;
+  [...fireSpots].forEach(f=>{scene.remove(f.mesh);}); fireSpots.length=0;
+  [...explosionParts].forEach(e=>{scene.remove(e.mesh);}); explosionParts.length=0;
+  [...airPlanes].forEach(p=>{scene.remove(p);}); airPlanes.length=0;
+
+  // Snapshot positions for animation
+  const startCamPos=camera.position.clone();
+  const startYaw=yaw, startPitch=pitch;
+  // Target: devesh face position
+  const facePos=devesh.position.clone().add(new THREE.Vector3(0,4.55*1.8,0));
+  const startDeveshRot=devesh.rotation.y;
+
+  // Store original arm transform for stretching
+  const armR=devesh.userData.armR;
+  const handR=devesh.userData.handR;
+  const origArmRot=armR.rotation.z;
+  const origHandPos=handR.position.clone();
+
+  let elapsed=0;
+  const totalDur=2800; // ms total
+
+  // Overlay for red flash
+  const overlay=document.createElement('div');
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(180,0,0,0);pointer-events:none;z-index:50;transition:none;';
+  document.body.appendChild(overlay);
+
+  function deathAnim(ts){
+    if(gameState!=='dead') return;
+    elapsed+=16.67;
+    const t=Math.min(elapsed/totalDur,1); // 0→1
+
+    // --- Phase 1 (0→0.35): Devesh snaps to face player, arm starts reaching ---
+    const p1=Math.min(t/0.35,1);
+    // Ease functions
+    const easeOut=x=>1-Math.pow(1-x,3);
+    const easeIn=x=>x*x*x;
+    const easeInOut=x=>x<0.5?4*x*x*x:(1-Math.pow(-2*x+2,3)/2);
+
+    // Devesh rotates to face camera
+    const targetDevYaw=Math.atan2(camera.position.x-devesh.position.x, camera.position.z-devesh.position.z);
+    devesh.rotation.y=targetDevYaw;
+
+    if(p1<1){
+      const armReach=easeOut(p1);
+
+      // Compute shoulder world position
+      const shoulderWorld=new THREE.Vector3(0.95,2.65,0).applyEuler(devesh.rotation).add(devesh.position);
+      shoulderWorld.y += devesh.position.y; // account for devesh base y
+
+      // Direction from shoulder to player in world space
+      const toPlayerWorld=camera.position.clone().sub(shoulderWorld).normalize();
+
+      // Convert to devesh local space
+      const invRot=new THREE.Euler(-devesh.rotation.x,-devesh.rotation.y,-devesh.rotation.z,'YXZ');
+      const toPlayerLocal=toPlayerWorld.clone().applyEuler(invRot);
+
+      // Arm cylinder's length axis is Y. We want Y to point along toPlayerLocal.
+      // rotation.z tilts in XY plane, rotation.x tilts in YZ plane.
+      // Angle from +Y axis in XY plane = rotation.z offset
+      const angleZ=-Math.atan2(toPlayerLocal.x, toPlayerLocal.y);
+      const angleX= Math.atan2(toPlayerLocal.z, Math.sqrt(toPlayerLocal.x**2+toPlayerLocal.y**2));
+
+      // Blend from rest pose to reach pose
+      armR.rotation.z=origArmRot*(1-armReach) + angleZ*armReach;
+      armR.rotation.x=armReach*angleX;
+
+      // Stretch the arm toward player
+      armR.scale.y=1+armReach*3.5;
+      armR.scale.x=1-armReach*0.25;
+      armR.scale.z=1-armReach*0.25;
+    }
+
+    // --- Phase 2 (0.35→1): Camera gets pulled toward face ---
+    if(t>0.35){
+      const p2=easeIn(Math.min((t-0.35)/0.65,1));
+
+      // Pull camera position toward face
+      camera.position.lerpVectors(startCamPos, facePos, p2);
+      // Pitch camera up toward face as it approaches
+      const lookDir=facePos.clone().sub(camera.position).normalize();
+      const targetPitch=-Math.asin(lookDir.y);
+      const targetYaw2=Math.atan2(-lookDir.x,-lookDir.z);
+      yaw=targetYaw2;
+      pitch=targetPitch;
+      camera.rotation.y=yaw;
+      camera.rotation.x=pitch;
+
+      // Red overlay fades in during the pull
+      const red=Math.floor(p2*200);
+      overlay.style.background=`rgba(180,0,0,${p2*0.85})`;
+    }
+
+    renderer.render(scene,camera);
+
+    if(t<1){
+      requestAnimationFrame(deathAnim);
+    } else {
+      // Animation done — full red screen + restart button
+      overlay.style.background='rgba(160,0,0,0.96)';
+      overlay.style.pointerEvents='auto';
+      overlay.style.display='flex';
+      overlay.style.flexDirection='column';
+      overlay.style.alignItems='center';
+      overlay.style.justifyContent='center';
+      const btn=document.createElement('button');
+      btn.textContent='↺  RESTART';
+      btn.style.cssText=`
+        background:#111;color:#fff;border:2px solid #333;
+        padding:16px 48px;font-size:18px;font-family:monospace;
+        letter-spacing:3px;border-radius:6px;cursor:pointer;
+        margin-top:24px;
+      `;
+      btn.onmouseover=()=>{btn.style.background='#222';};
+      btn.onmouseleave=()=>{btn.style.background='#111';};
+      btn.onclick=()=>location.reload();
+      overlay.appendChild(btn);
+    }
+  }
+  requestAnimationFrame(deathAnim);
+}
+    if(bossHP<=0&&gameState==='playing'){
+  gameState='won';
+  screenShake(3);
+  deveshDeathExplosion();
+
+  if(bossHP<=0&&gameState==='won'){
+    // already handled inside deveshDeathExplosion
+  }
+}
+
+
+    renderer.render(scene,camera);
+  } catch(e) {
+    console.error('Error in animate loop:', e, e.stack);
+    renderer.render(scene,camera);
+  }
+}
+
+addEventListener('resize',()=>{ camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth,innerHeight); });
+
+// Initial render to show start screen
+renderer.render(scene,camera);
+
+requestAnimationFrame(animate);
+</script>
+</body>
+</html>

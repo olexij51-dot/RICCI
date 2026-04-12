@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DEVESH GAMES</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background-color: #D4A017;
+      font-family: 'Segoe UI', sans-serif;
+      min-height: 100vh;
+    }
+
+    /* ── Back button ── */
+    .back-btn {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      background: #b38513;
+      color: white;
+      font-weight: bold;
+      font-size: 0.95rem;
+      padding: 8px 18px;
+      border-radius: 8px;
+      text-decoration: none;
+      z-index: 100;
+      transition: background 0.2s, transform 0.2s;
+    }
+    .back-btn:hover {
+      background: #8c6810;
+      transform: scale(1.05);
+    }
+
+    /* ── Title ── */
+    h1 {
+      text-align: center;
+      font-size: 3rem;
+      font-weight: 900;
+      color: black;
+      letter-spacing: 3px;
+      padding: 60px 20px 40px;
+    }
+
+    /* ── Grid ── */
+    .games-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 35px;
+      padding: 0 60px 80px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* ── Game card ── */
+    .game-card {
+      text-decoration: none;
+      color: black;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.25s ease;
+    }
+
+    .game-card:hover {
+      transform: translateY(-6px) scale(1.02);
+    }
+
+    /* ── Image box ── */
+    .game-img-wrap {
+      width: 100%;
+      aspect-ratio: 16/9;
+      background: #c49420;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+      border-radius: 12px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+    }
+
+    .game-img-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    /* Fallback icon shown when no image */
+    .game-img-wrap .icon {
+      font-size: 5rem;
+      user-select: none;
+    }
+
+    /* Hover overlay */
+    .game-img-wrap .hover-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.55);
+      color: white;
+      font-size: 1.3rem;
+      font-weight: bold;
+      letter-spacing: 1px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .game-card:hover .hover-overlay {
+      opacity: 1;
+    }
+
+    /* ── Label (sits below the image box, outside it) ── */
+    .game-label {
+      padding: 12px 4px 0;
+      text-align: left;
+    }
+
+    .game-label .game-title {
+      font-size: 1.1rem;
+      font-weight: 800;
+      letter-spacing: 1px;
+      color: black;
+    }
+
+    .game-label .game-desc {
+      font-size: 0.82rem;
+      color: #2a1a00;
+      margin-top: 3px;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 750px) {
+      .games-grid {
+        grid-template-columns: 1fr;
+        padding: 0 24px 60px;
+      }
+
+      h1 {
+        font-size: 2.2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <a href="index.html" class="back-btn">← Back</a>
+
+  <h1>DEVESH GAMES</h1>
+
+  <div class="games-grid">
+
+    <!-- GAME 1 -->
+    <a class="game-card" href="kumar-escape.html" target="_blank">
+      <div class="game-img-wrap">
+        <!-- Replace the img src with your game screenshot, or remove the img tag to show the icon -->
+        <img src="kumar-escape-cover.jpg" alt="Game 1"
+          onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+        <div class="icon" style="display:none;"></div>
+        <div class="hover-overlay">PART 1</div>
+      </div>
+      <div class="game-label">
+        <div class="game-title">KUMAR ESCAPE</div>
+        <div class="game-desc">You got locked up in some basement . but all you need is to collect 6 curry bowls , but there is something massive chasing you.</div>
+      </div>
+    </a>
+
+    <!-- GAME 2 -->
+    <a class="game-card" href="devesh_boss_fight.html" target="_blank">
+      <div class="game-img-wrap">
+        <img src="boss-fight-devesh-cover.jpg" alt="Game 2"
+          onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+        <div class="icon" style="display:none;"></div>
+        <div class="hover-overlay">PART 2</div>
+      </div>
+      <div class="game-label">
+        <div class="game-title">DEVESH BOSS FIGHT</div>
+        <div class="game-desc">If you made it out you think devesh is just going to let you go like that? . No , you have to fight him in a 1v1 . </div>
+      </div>
+    </a>
+
+    <!-- GAME 3 -->
+    <a class="game-card" href="YOUR_GAME_3_URL_HERE" target="_blank">
+      <div class="game-img-wrap">
+        <img src="not-done.jpg" alt="Game 3"
+          onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+        <div class="icon" style="display:none;"></div>
+        <div class="hover-overlay">FINAL</div>
+      </div>
+      <div class="game-label">
+        <div class="game-title">FIVE NIGHTS AT DEVESHES</div>
+        <div class="game-desc">You dive into devesh which makes you see all his memories.</div>
+      </div>
+    </a>
+
+  </div>
+
+</body>
+</html>
